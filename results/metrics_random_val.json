@@ -1,0 +1,25 @@
+{
+  "name": "random_val",
+  "stage": "val",
+  "k": 10,
+  "users": 188087,
+  "pairs": 20281548,
+  "ndcg@10": 0.087553,
+  "recall@10": 0.093473,
+  "coverage": 1.0,
+  "positives_in_candidates": 1472848,
+  "hits": 123926,
+  "universe": 87585,
+  "users_sampled": null,
+  "elapsed_s": 7.04,
+  "avg_user_latency_ms": 0.0374,
+  "evaluated_at": "2026-11-05 21:52:44",
+  "data": {
+    "train": "D:\\movie-rec\\data\\official\\data\\processed\\train.csv",
+    "candidates": "D:\\movie-rec\\data\\official\\data\\candidates\\validation_candidates.csv",
+    "labels": "D:\\movie-rec\\data\\official\\data\\processed\\validation.csv"
+  },
+  "scores_file": "D:\\movie-rec\\results\\scores_random_val.csv",
+  "missing_pairs": 0,
+  "extra_pairs": 0
+}

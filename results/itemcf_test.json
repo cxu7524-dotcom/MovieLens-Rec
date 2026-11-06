@@ -1,0 +1,72 @@
+{
+  "model": "itemcf",
+  "stage": "test",
+  "k_chosen": 200,
+  "block_items": 2000,
+  "matrix": {
+    "users": 200571,
+    "items": 46847,
+    "nnz": 12905652
+  },
+  "similarity": {
+    "edges": 8874088,
+    "build_s": 28.25,
+    "blocks": 24,
+    "peak_rss_mb": 2849.5
+  },
+  "k_sweep": [],
+  "full": {
+    "name": "itemcf_test",
+    "stage": "test",
+    "k": 10,
+    "users": 191007,
+    "pairs": 20660431,
+    "ndcg@10": null,
+    "recall@10": null,
+    "coverage": 0.328549,
+    "positives_in_candidates": 0,
+    "hits": 0,
+    "universe": 87585,
+    "users_sampled": null,
+    "elapsed_s": 2.01,
+    "avg_user_latency_ms": 0.0105,
+    "evaluated_at": "2026-11-05 20:36:54",
+    "data": {
+      "train": "D:\\movie-rec\\data\\official\\data\\processed\\train.csv",
+      "candidates": "D:\\movie-rec\\data\\official\\data\\candidates\\test_candidates.csv",
+      "labels": null
+    },
+    "scores_file": "D:\\movie-rec\\results\\scores_itemcf_test.csv",
+    "missing_pairs": 0,
+    "extra_pairs": 0,
+    "score_s": 69.4,
+    "pairs_per_s": 297665,
+    "peak_rss_mb": 3478.3
+  },
+  "baseline_b0": {
+    "name": "popular_val",
+    "stage": "val",
+    "k": 10,
+    "users": 188087,
+    "pairs": 20281548,
+    "ndcg@10": 0.875167,
+    "recall@10": 0.863878,
+    "coverage": 0.163727,
+    "positives_in_candidates": 1472848,
+    "hits": 904880,
+    "universe": 87585,
+    "users_sampled": null,
+    "elapsed_s": 2.85,
+    "avg_user_latency_ms": 0.0151,
+    "evaluated_at": "2026-11-05 19:53:36",
+    "data": {
+      "train": "D:\\movie-rec\\data\\official\\data\\processed\\train.csv",
+      "candidates": "D:\\movie-rec\\data\\official\\data\\candidates\\validation_candidates.csv",
+      "labels": "D:\\movie-rec\\data\\official\\data\\processed\\validation.csv"
+    },
+    "scores_file": "D:\\movie-rec\\results\\scores_popular_val.csv",
+    "missing_pairs": 0,
+    "extra_pairs": 0
+  },
+  "vs_b0_ndcg": null
+}

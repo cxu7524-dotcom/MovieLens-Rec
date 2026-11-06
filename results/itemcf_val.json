@@ -1,0 +1,148 @@
+{
+  "model": "itemcf",
+  "k_chosen": 200,
+  "block_items": 2000,
+  "matrix": {
+    "users": 200571,
+    "items": 46847,
+    "nnz": 12905652
+  },
+  "similarity": {
+    "edges": 8874088,
+    "build_s": 25.49,
+    "blocks": 24,
+    "peak_rss_mb": 3763.9
+  },
+  "k_sweep": [
+    {
+      "name": "itemcf_k50_sample",
+      "stage": "val",
+      "k": 10,
+      "users": 20000,
+      "pairs": 2157704,
+      "ndcg@10": 0.921589,
+      "recall@10": 0.863514,
+      "coverage": 0.176058,
+      "positives_in_candidates": 157704,
+      "hits": 98634,
+      "universe": 87585,
+      "users_sampled": null,
+      "elapsed_s": 0.12,
+      "avg_user_latency_ms": 0.0058,
+      "evaluated_at": "2026-11-05 20:00:52",
+      "data": {
+        "train": "D:\\movie-rec\\data\\official\\data\\processed\\train.csv",
+        "candidates": "D:\\movie-rec\\data\\official\\data\\candidates\\validation_candidates.csv",
+        "labels": "D:\\movie-rec\\data\\official\\data\\processed\\validation.csv"
+      },
+      "k_neighbors": 50,
+      "score_s": 5.0,
+      "nnz": 2314001
+    },
+    {
+      "name": "itemcf_k100_sample",
+      "stage": "val",
+      "k": 10,
+      "users": 20000,
+      "pairs": 2157704,
+      "ndcg@10": 0.929223,
+      "recall@10": 0.871594,
+      "coverage": 0.196335,
+      "positives_in_candidates": 157704,
+      "hits": 99222,
+      "universe": 87585,
+      "users_sampled": null,
+      "elapsed_s": 0.13,
+      "avg_user_latency_ms": 0.0064,
+      "evaluated_at": "2026-11-05 20:00:59",
+      "data": {
+        "train": "D:\\movie-rec\\data\\official\\data\\processed\\train.csv",
+        "candidates": "D:\\movie-rec\\data\\official\\data\\candidates\\validation_candidates.csv",
+        "labels": "D:\\movie-rec\\data\\official\\data\\processed\\validation.csv"
+      },
+      "k_neighbors": 100,
+      "score_s": 5.2,
+      "nnz": 4559703
+    },
+    {
+      "name": "itemcf_k200_sample",
+      "stage": "val",
+      "k": 10,
+      "users": 20000,
+      "pairs": 2157704,
+      "ndcg@10": 0.931531,
+      "recall@10": 0.875225,
+      "coverage": 0.218451,
+      "positives_in_candidates": 157704,
+      "hits": 99436,
+      "universe": 87585,
+      "users_sampled": null,
+      "elapsed_s": 0.15,
+      "avg_user_latency_ms": 0.0075,
+      "evaluated_at": "2026-11-05 20:01:06",
+      "data": {
+        "train": "D:\\movie-rec\\data\\official\\data\\processed\\train.csv",
+        "candidates": "D:\\movie-rec\\data\\official\\data\\candidates\\validation_candidates.csv",
+        "labels": "D:\\movie-rec\\data\\official\\data\\processed\\validation.csv"
+      },
+      "k_neighbors": 200,
+      "score_s": 5.6,
+      "nnz": 8874088
+    }
+  ],
+  "k_sweep_sample_users": 20000,
+  "full": {
+    "name": "itemcf_val",
+    "stage": "val",
+    "k": 10,
+    "users": 188087,
+    "pairs": 20281548,
+    "ndcg@10": 0.931917,
+    "recall@10": 0.875561,
+    "coverage": 0.33121,
+    "positives_in_candidates": 1472848,
+    "hits": 936426,
+    "universe": 87585,
+    "users_sampled": null,
+    "elapsed_s": 1.65,
+    "avg_user_latency_ms": 0.0088,
+    "evaluated_at": "2026-11-05 20:02:36",
+    "data": {
+      "train": "D:\\movie-rec\\data\\official\\data\\processed\\train.csv",
+      "candidates": "D:\\movie-rec\\data\\official\\data\\candidates\\validation_candidates.csv",
+      "labels": "D:\\movie-rec\\data\\official\\data\\processed\\validation.csv"
+    },
+    "scores_file": "D:\\movie-rec\\results\\scores_itemcf_val.csv",
+    "missing_pairs": 0,
+    "extra_pairs": 0,
+    "score_s": 52.7,
+    "pairs_per_s": 385050,
+    "peak_rss_mb": 3763.9
+  },
+  "baseline_b0": {
+    "name": "popular_val",
+    "stage": "val",
+    "k": 10,
+    "users": 188087,
+    "pairs": 20281548,
+    "ndcg@10": 0.875167,
+    "recall@10": 0.863878,
+    "coverage": 0.163727,
+    "positives_in_candidates": 1472848,
+    "hits": 904880,
+    "universe": 87585,
+    "users_sampled": null,
+    "elapsed_s": 2.85,
+    "avg_user_latency_ms": 0.0151,
+    "evaluated_at": "2026-11-05 19:53:36",
+    "data": {
+      "train": "D:\\movie-rec\\data\\official\\data\\processed\\train.csv",
+      "candidates": "D:\\movie-rec\\data\\official\\data\\candidates\\validation_candidates.csv",
+      "labels": "D:\\movie-rec\\data\\official\\data\\processed\\validation.csv"
+    },
+    "scores_file": "D:\\movie-rec\\results\\scores_popular_val.csv",
+    "missing_pairs": 0,
+    "extra_pairs": 0
+  },
+  "vs_b0_ndcg": 0.0567
+}

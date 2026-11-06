@@ -1,0 +1,74 @@
+{
+  "stage": "val",
+  "topk": 200,
+  "block_items": 1000,
+  "runs": [
+    {
+      "parallelism": 1,
+      "total_s": 276.5,
+      "cooccurrence_s": 121.8,
+      "scoring_s": 42.6,
+      "load_s": 69.4,
+      "pairs_per_s": 11704.7,
+      "ndcg@10": 0.932034,
+      "peak_rss_mb": 5143.1,
+      "speedup": 1.0,
+      "efficiency": 1.0,
+      "to_spark_s": 33.3
+    },
+    {
+      "parallelism": 2,
+      "total_s": 220.0,
+      "cooccurrence_s": 71.4,
+      "scoring_s": 29.6,
+      "load_s": 66.8,
+      "pairs_per_s": 14710.7,
+      "ndcg@10": 0.932034,
+      "peak_rss_mb": 5137.9,
+      "speedup": 1.26,
+      "efficiency": 0.63,
+      "to_spark_s": 42.7
+    },
+    {
+      "parallelism": 4,
+      "total_s": 187.2,
+      "cooccurrence_s": 50.2,
+      "scoring_s": 23.6,
+      "load_s": 60.1,
+      "pairs_per_s": 17288.3,
+      "ndcg@10": 0.932034,
+      "peak_rss_mb": 5143.2,
+      "speedup": 1.48,
+      "efficiency": 0.37,
+      "to_spark_s": 43.6
+    },
+    {
+      "parallelism": 8,
+      "total_s": 188.7,
+      "cooccurrence_s": 50.3,
+      "scoring_s": 29.3,
+      "load_s": 53.5,
+      "pairs_per_s": 17150.8,
+      "ndcg@10": 0.932034,
+      "peak_rss_mb": 5140.6,
+      "speedup": 1.47,
+      "efficiency": 0.18,
+      "to_spark_s": 45.4
+    },
+    {
+      "parallelism": 16,
+      "total_s": 201.9,
+      "cooccurrence_s": 48.3,
+      "scoring_s": 50.2,
+      "load_s": 48.8,
+      "pairs_per_s": 16029.5,
+      "ndcg@10": 0.932034,
+      "peak_rss_mb": 5144.8,
+      "speedup": 1.37,
+      "efficiency": 0.09,
+      "to_spark_s": 44.9
+    }
+  ],
+  "users_sampled": 30000,
+  "note": "speedup is relative to the local[1] run in the same series"
+}

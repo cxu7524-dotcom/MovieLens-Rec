@@ -1,0 +1,25 @@
+{
+  "name": "lsh_val",
+  "stage": "val",
+  "k": 10,
+  "users": 188087,
+  "pairs": 20281548,
+  "ndcg@10": 0.91327,
+  "recall@10": 0.861247,
+  "coverage": 0.258275,
+  "positives_in_candidates": 1472848,
+  "hits": 925321,
+  "universe": 87585,
+  "users_sampled": null,
+  "elapsed_s": 1.24,
+  "avg_user_latency_ms": 0.0066,
+  "evaluated_at": "2026-11-05 20:33:04",
+  "data": {
+    "train": "D:\\movie-rec\\data\\official\\data\\processed\\train.csv",
+    "candidates": "D:\\movie-rec\\data\\official\\data\\candidates\\validation_candidates.csv",
+    "labels": "D:\\movie-rec\\data\\official\\data\\processed\\validation.csv"
+  },
+  "scores_file": "D:\\movie-rec\\results\\scores_lsh_val.csv",
+  "missing_pairs": 0,
+  "extra_pairs": 0
+}

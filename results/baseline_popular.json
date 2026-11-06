@@ -1,0 +1,248 @@
+{
+  "baseline": "B0",
+  "chosen": "popular_count_val",
+  "chosen_metrics": {
+    "name": "popular_val",
+    "stage": "val",
+    "k": 10,
+    "users": 188087,
+    "pairs": 20281548,
+    "ndcg@10": 0.875167,
+    "recall@10": 0.863878,
+    "coverage": 0.163727,
+    "positives_in_candidates": 1472848,
+    "hits": 904880,
+    "universe": 87585,
+    "users_sampled": null,
+    "elapsed_s": 2.85,
+    "avg_user_latency_ms": 0.0151,
+    "evaluated_at": "2026-11-05 19:53:36",
+    "data": {
+      "train": "D:\\movie-rec\\data\\official\\data\\processed\\train.csv",
+      "candidates": "D:\\movie-rec\\data\\official\\data\\candidates\\validation_candidates.csv",
+      "labels": "D:\\movie-rec\\data\\official\\data\\processed\\validation.csv"
+    },
+    "scores_file": "D:\\movie-rec\\results\\scores_popular_val.csv",
+    "missing_pairs": 0,
+    "extra_pairs": 0
+  },
+  "variants": [
+    {
+      "name": "popular_count_val",
+      "stage": "val",
+      "k": 10,
+      "users": 188087,
+      "pairs": 20281548,
+      "ndcg@10": 0.875167,
+      "recall@10": 0.863878,
+      "coverage": 0.163727,
+      "positives_in_candidates": 1472848,
+      "hits": 904880,
+      "universe": 87585,
+      "users_sampled": null,
+      "elapsed_s": 3.29,
+      "avg_user_latency_ms": 0.0175,
+      "evaluated_at": "2026-11-05 19:52:31",
+      "data": {
+        "train": "D:\\movie-rec\\data\\official\\data\\processed\\train.csv",
+        "candidates": "D:\\movie-rec\\data\\official\\data\\candidates\\validation_candidates.csv",
+        "labels": "D:\\movie-rec\\data\\official\\data\\processed\\validation.csv"
+      },
+      "score_s": 1.86,
+      "params": {
+        "kind": "count"
+      }
+    },
+    {
+      "name": "popular_decay_30d_val",
+      "stage": "val",
+      "k": 10,
+      "users": 188087,
+      "pairs": 20281548,
+      "ndcg@10": 0.805119,
+      "recall@10": 0.797294,
+      "coverage": 0.165976,
+      "positives_in_candidates": 1472848,
+      "hits": 850846,
+      "universe": 87585,
+      "users_sampled": null,
+      "elapsed_s": 4.54,
+      "avg_user_latency_ms": 0.0241,
+      "evaluated_at": "2026-11-05 19:52:39",
+      "data": {
+        "train": "D:\\movie-rec\\data\\official\\data\\processed\\train.csv",
+        "candidates": "D:\\movie-rec\\data\\official\\data\\candidates\\validation_candidates.csv",
+        "labels": "D:\\movie-rec\\data\\official\\data\\processed\\validation.csv"
+      },
+      "score_s": 3.18,
+      "params": {
+        "kind": "decay",
+        "half_life_days": 30.0
+      }
+    },
+    {
+      "name": "popular_decay_90d_val",
+      "stage": "val",
+      "k": 10,
+      "users": 188087,
+      "pairs": 20281548,
+      "ndcg@10": 0.812514,
+      "recall@10": 0.809926,
+      "coverage": 0.165862,
+      "positives_in_candidates": 1472848,
+      "hits": 860334,
+      "universe": 87585,
+      "users_sampled": null,
+      "elapsed_s": 4.67,
+      "avg_user_latency_ms": 0.0248,
+      "evaluated_at": "2026-11-05 19:52:48",
+      "data": {
+        "train": "D:\\movie-rec\\data\\official\\data\\processed\\train.csv",
+        "candidates": "D:\\movie-rec\\data\\official\\data\\candidates\\validation_candidates.csv",
+        "labels": "D:\\movie-rec\\data\\official\\data\\processed\\validation.csv"
+      },
+      "score_s": 3.19,
+      "params": {
+        "kind": "decay",
+        "half_life_days": 90.0
+      }
+    },
+    {
+      "name": "popular_decay_365d_val",
+      "stage": "val",
+      "k": 10,
+      "users": 188087,
+      "pairs": 20281548,
+      "ndcg@10": 0.820548,
+      "recall@10": 0.823443,
+      "coverage": 0.165496,
+      "positives_in_candidates": 1472848,
+      "hits": 869445,
+      "universe": 87585,
+      "users_sampled": null,
+      "elapsed_s": 4.61,
+      "avg_user_latency_ms": 0.0245,
+      "evaluated_at": "2026-11-05 19:52:57",
+      "data": {
+        "train": "D:\\movie-rec\\data\\official\\data\\processed\\train.csv",
+        "candidates": "D:\\movie-rec\\data\\official\\data\\candidates\\validation_candidates.csv",
+        "labels": "D:\\movie-rec\\data\\official\\data\\processed\\validation.csv"
+      },
+      "score_s": 3.25,
+      "params": {
+        "kind": "decay",
+        "half_life_days": 365.0
+      }
+    }
+  ],
+  "half_lives_days": [
+    30.0,
+    90.0,
+    365.0
+  ],
+  "reference_ts": 1697158867.0,
+  "top10_by_count": [
+    {
+      "movieId": 318,
+      "score": 82101.0,
+      "title": "Shawshank Redemption, The (1994)"
+    },
+    {
+      "movieId": 296,
+      "score": 70367.0,
+      "title": "Pulp Fiction (1994)"
+    },
+    {
+      "movieId": 2571,
+      "score": 66243.0,
+      "title": "Matrix, The (1999)"
+    },
+    {
+      "movieId": 356,
+      "score": 65363.0,
+      "title": "Forrest Gump (1994)"
+    },
+    {
+      "movieId": 593,
+      "score": 64011.0,
+      "title": "Silence of the Lambs, The (1991)"
+    },
+    {
+      "movieId": 260,
+      "score": 58210.0,
+      "title": "Star Wars: Episode IV - A New Hope (1977)"
+    },
+    {
+      "movieId": 2959,
+      "score": 55668.0,
+      "title": "Fight Club (1999)"
+    },
+    {
+      "movieId": 527,
+      "score": 53051.0,
+      "title": "Schindler's List (1993)"
+    },
+    {
+      "movieId": 1196,
+      "score": 50236.0,
+      "title": "Star Wars: Episode V - The Empire Strikes Back (1980)"
+    },
+    {
+      "movieId": 4993,
+      "score": 49524.0,
+      "title": "Lord of the Rings: The Fellowship of the Ring, The (2001)"
+    }
+  ],
+  "top10_decay_90d": [
+    {
+      "movieId": 79132,
+      "score": 750.398,
+      "title": "Inception (2010)"
+    },
+    {
+      "movieId": 318,
+      "score": 723.778,
+      "title": "Shawshank Redemption, The (1994)"
+    },
+    {
+      "movieId": 58559,
+      "score": 709.106,
+      "title": "Dark Knight, The (2008)"
+    },
+    {
+      "movieId": 2571,
+      "score": 668.322,
+      "title": "Matrix, The (1999)"
+    },
+    {
+      "movieId": 109487,
+      "score": 655.831,
+      "title": "Interstellar (2014)"
+    },
+    {
+      "movieId": 2959,
+      "score": 655.764,
+      "title": "Fight Club (1999)"
+    },
+    {
+      "movieId": 4993,
+      "score": 584.266,
+      "title": "Lord of the Rings: The Fellowship of the Ring, The (2001)"
+    },
+    {
+      "movieId": 7153,
+      "score": 575.091,
+      "title": "Lord of the Rings: The Return of the King, The (2003)"
+    },
+    {
+      "movieId": 5952,
+      "score": 564.262,
+      "title": "Lord of the Rings: The Two Towers, The (2002)"
+    },
+    {
+      "movieId": 296,
+      "score": 551.405,
+      "title": "Pulp Fiction (1994)"
+    }
+  ]
+}

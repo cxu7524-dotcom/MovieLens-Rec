@@ -1,0 +1,26 @@
+.venv/
+__pycache__/
+*.py[cod]
+data/
+artifacts/
+.logs/
+.cache/
+conf/local.toml
+.pytest_cache/
+# Score files and neighbour tables are deliverables passed to member three and
+# member four out of band: 467 MB each, ~3 GB in total. Keep the small JSON/CSV
+# summaries in results/ tracked, ignore the bulk.
+results/*.csv
+results/*.npz
+# ...but the small summary tables are deliverables for member four, keep them.
+!results/table_*.csv
+
+# Historical debug leftovers at the project root.
+tmp*/
+pip-*/
+pip-build-tracker-*
+pip-ephem-wheel-cache-*
+pip-install-*
+pip-unpack-*
+movie-rec-spark-home/
+*.log

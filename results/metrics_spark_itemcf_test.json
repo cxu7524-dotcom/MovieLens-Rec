@@ -1,0 +1,25 @@
+{
+  "name": "spark_itemcf_test",
+  "stage": "test",
+  "k": 10,
+  "users": 191007,
+  "pairs": 20660431,
+  "ndcg@10": null,
+  "recall@10": null,
+  "coverage": 0.328549,
+  "positives_in_candidates": 0,
+  "hits": 0,
+  "universe": 87585,
+  "users_sampled": null,
+  "elapsed_s": 1.78,
+  "avg_user_latency_ms": 0.0093,
+  "evaluated_at": "2026-11-05 21:18:41",
+  "data": {
+    "train": "D:\\movie-rec\\data\\official\\data\\processed\\train.csv",
+    "candidates": "D:\\movie-rec\\data\\official\\data\\candidates\\test_candidates.csv",
+    "labels": null
+  },
+  "scores_file": "D:\\movie-rec\\results\\scores_spark_itemcf_test.csv",
+  "missing_pairs": 0,
+  "extra_pairs": 0
+}
