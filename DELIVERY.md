@@ -35,6 +35,10 @@
 | `results/scores_spark_itemcf_test.parquet` | 20,660,431 | 78.1 MB | **不用给** | 与 `itemcf_test` **逐字节等价**，给一份就行 |
 
 - 最小交接包：**155 MB**（两个 parquet）。
+- **下载地址（不用等人发文件）**：
+  - https://github.com/cxu7524-dotcom/MovieLens-Rec/releases/download/scores-v1/scores_itemcf_val.parquet
+  - https://github.com/cxu7524-dotcom/MovieLens-Rec/releases/download/scores-v1/scores_itemcf_test.parquet
+  - Release 页：https://github.com/cxu7524-dotcom/MovieLens-Rec/releases/tag/scores-v1
 - 原 CSV 合计 2.8 GB，parquet 压 6.1 倍，已验证**行数、列名、dtype、score 总和完全一致**。
 - 读取：`pd.read_parquet('results/scores_itemcf_val.parquet')`，pandas 直接认，不用装额外东西（pyarrow 已在 requirements）。
 - 想自己从 CSV 转：`scripts/run_all.py --only itemcf` 重跑，或按上面命令 `to_parquet(compression='zstd')`。
