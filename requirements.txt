@@ -1,0 +1,12 @@
+# Python 3.11 is required. Java 17 is required separately (Spark 3.5 rejects 21).
+pyspark==3.5.3
+# Versions actually installed and validated on this machine (2026-11).
+# The earlier pins (numpy<2, pandas<2.2, pyarrow<21) no longer matched the venv
+# and blocked installing scipy, which needs numpy>=2.
+numpy==2.4.6
+pandas==3.1.0
+pyarrow==26.0.0
+# scipy: sparse matrices for exact ItemCF and LSH (installed separately, see README)
+scipy>=1.14
+# tests only
+pytest>=8.0

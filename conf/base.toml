@@ -1,0 +1,53 @@
+# Shared configuration. Machine-specific overrides belong in conf/local.toml
+# (git-ignored), which is merged on top of this file by movie_rec.config.
+#
+# Paths are relative to the project root (movie-rec/) and always use the
+# forward slash form, which Windows and Linux both accept.
+
+[data]
+# Development fixture produced by scripts/make_dev_fixture.py.
+# When member one delivers the official files, point these at
+# data/processed/split.parquet and data/candidates/... instead.
+split = "data/dev/split.parquet"
+candidates_val = "data/dev/candidates_val.parquet"
+candidates_test = "data/dev/candidates_test.parquet"
+
+[data.official]
+# Official delivery from member one (data.zip, extracted to data/official/).
+# CSV, not Parquet, and the layout differs from the development fixture:
+#   - no `split` column: train and validation are separate files, test labels
+#     are held by member one and are never visible here;
+#   - candidates carry no label: labels come from validation.csv (rating >= 4);
+#   - every stage has a per-user cutoff timestamp that bounds usable history.
+train = "data/official/data/processed/train.csv"
+validation = "data/official/data/processed/validation.csv"
+movies = "data/official/data/raw/ml-32m/movies.csv"
+candidates_val = "data/official/data/candidates/validation_candidates.csv"
+candidates_test = "data/official/data/candidates/test_candidates.csv"
+cutoffs_val = "data/official/data/candidates/validation_cutoffs.csv"
+cutoffs_test = "data/official/data/candidates/test_cutoffs.csv"
+
+[protocol]
+# Frozen project rules. If the teacher's script hard-codes something else,
+# change it here and record the difference in README.md instead of editing code.
+positive_threshold = 4.0
+train_ratio = 0.80
+val_ratio = 0.10
+test_ratio = 0.10
+negatives_per_user = 100
+# Test candidates use the official seed; validation gets an independent one.
+test_seed = 20260907
+val_seed = 20260908
+ndcg_k = 10
+
+[spark]
+master = "local[*]"
+# 8g is the safe default for a 16 GB machine; raise to 12g/16g for the full run.
+driver_memory = "8g"
+shuffle_partitions = 64
+# Empty means "use JAVA_HOME or java on PATH". Spark 3.5 supports Java 8/11/17.
+# Put the local JDK 17 path in conf/local.toml, not here.
+java_home = ""
+# Scratch directory for Spark; kept inside the project, not in %TEMP%.
+local_dir = "data/_spark_tmp"
+ui_enabled = false

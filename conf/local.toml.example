@@ -1,0 +1,7 @@
+# Copy to conf/local.toml and edit for your machine. Never commit local.toml.
+[spark]
+# Java 17 only: Spark 3.5 does not support Java 21.
+# Windows example: java_home = "C:/Program Files/Eclipse Adoptium/jdk-17.0.12.7-hotspot"
+java_home = ""
+# Raise to 12g/16g on a machine with enough RAM for the full MovieLens 32M run.
+driver_memory = "8g"
