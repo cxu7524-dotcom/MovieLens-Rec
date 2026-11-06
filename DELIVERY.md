@@ -23,22 +23,24 @@
 
 ### 给成员三（排序/集成）
 
-| 文件 | 行数 | 大小 | 用途 |
-|---|---|---|---|
-| `results/scores_itemcf_val.csv` | 20,281,548 | 467 MB | val 阶段召回分（主） |
-| `results/scores_itemcf_test.csv` | 20,660,431 | 476 MB | test 阶段召回分（主） |
-| `results/scores_popular_val.csv` | 20,281,548 | 467 MB | B0 对照 + 融合兜底路 |
-| `results/scores_lsh_val.csv` | 20,281,548 | 467 MB | **仅供对比，不建议进融合** |
-| `results/scores_lsh_test.csv` | 20,660,431 | 476 MB | 同上 |
-| `results/scores_spark_itemcf_test.csv` | 20,660,431 | 476 MB | 与 `scores_itemcf_test.csv` **内容等价**，二选一 |
+**只要 2 个文件就够跑通，第 3 个是可选对照。** 已转好 parquet，单文件 77 MB，微信能传。
 
-> 合计约 2.8 GB，微信传不了。建议转 parquet（约 1/4 大小）：
->
-> ```powershell
-> .\.venv\Scripts\python.exe -c "import pandas as pd,glob;[pd.read_csv(f).to_parquet(f.replace('.csv','.parquet'),index=False,compression='zstd') for f in glob.glob('results/scores_*.csv')]"
-> ```
->
-> 或者不给文件、只给脚本让对方自己跑（`scripts/run_all.py --only itemcf`，2.5 分钟）。
+| 文件 | 行数 | parquet | 必要性 | 用途 |
+|---|---|---|---|---|
+| `results/scores_itemcf_val.parquet` | 20,281,548 | **76.7 MB** | **必需** | val 召回分，训练/调排序模型 |
+| `results/scores_itemcf_test.parquet` | 20,660,431 | **78.1 MB** | **必需** | test 召回分，生成最终 Top-10 |
+| `results/scores_popular_val.parquet` | 20,281,548 | 83.4 MB | 可选 | 融合兜底路 + B0 对照 |
+| `results/scores_lsh_val.parquet` | 20,281,548 | 52.1 MB | 可选 | **仅供对比，别进融合** |
+| `results/scores_lsh_test.parquet` | 20,660,431 | 53.1 MB | 不用给 | 同上，且 test 无标签 |
+| `results/scores_spark_itemcf_test.parquet` | 20,660,431 | 78.1 MB | **不用给** | 与 `itemcf_test` **逐字节等价**，给一份就行 |
+
+- 最小交接包：**155 MB**（两个 parquet）。
+- 原 CSV 合计 2.8 GB，parquet 压 6.1 倍，已验证**行数、列名、dtype、score 总和完全一致**。
+- 读取：`pd.read_parquet('results/scores_itemcf_val.parquet')`，pandas 直接认，不用装额外东西（pyarrow 已在 requirements）。
+- 想自己从 CSV 转：`scripts/run_all.py --only itemcf` 重跑，或按上面命令 `to_parquet(compression='zstd')`。
+- 也可以不给文件、只给仓库地址让对方跑（`run_all.py --only itemcf`，2.5 分钟，峰值 3.8 GB）。
+
+> **test 分数不是终点**：成员三用它出 Top-10 后，最终 test 指标要由**能拿到 test 标签的人**（成员一 / 成员四）来算。所以 `scores_itemcf_test` 最终会在成员三 → 成员一/四之间再流转一次，别只发给成员三就完事。
 
 ### 给成员四（评测/报告）
 

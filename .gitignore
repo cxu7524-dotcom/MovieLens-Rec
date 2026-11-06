@@ -12,6 +12,7 @@ conf/local.toml
 # summaries in results/ tracked, ignore the bulk.
 results/*.csv
 results/*.npz
+results/*.parquet
 # ...but the small summary tables are deliverables for member four, keep them.
 !results/table_*.csv
 
