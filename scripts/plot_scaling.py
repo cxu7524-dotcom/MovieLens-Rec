@@ -84,8 +84,15 @@ def _panel(x0: float, width: float, runs: list[dict], title: str,
             cx, cy = px(i), _scale(v, y_lo, y_hi, bottom, top)
             out.append(f'<circle cx="{cx:.1f}" cy="{cy:.1f}" r="3" fill="#fff" '
                        f'stroke="{colour}" stroke-width="2"/>')
+            # a small white plate keeps the label readable where the line
+            # would otherwise run straight through the digits
+            text = f"{v:.0f}"
+            plate_w = 5.6 * len(text) + 4
+            out.append(f'<rect x="{cx - plate_w / 2:.1f}" y="{cy - 18:.1f}" '
+                       f'width="{plate_w:.1f}" height="11" rx="2" fill="#ffffff" '
+                       f'opacity="0.88"/>')
             out.append(f'<text x="{cx:.1f}" y="{cy - 9:.1f}" text-anchor="middle" '
-                       f'font-size="9" fill="{colour}">{v:.0f}</text>')
+                       f'font-size="9" fill="{colour}">{text}</text>')
 
     # legend, bottom-right where the falling curves leave room
     ly = bottom - 14
@@ -143,8 +150,12 @@ def _speedup_panel(x0: float, width: float, runs: list[dict]) -> list[str]:
         cx, cy = px(n), _scale(s, 0, y_hi, bottom, top)
         out.append(f'<circle cx="{cx:.1f}" cy="{cy:.1f}" r="3.2" fill="#fff" stroke="{BLUE}" '
                    f'stroke-width="2"/>')
+        text = f"{s:.2f}×"
+        plate_w = 6.0 * len(text) + 4
+        out.append(f'<rect x="{cx - plate_w / 2:.1f}" y="{cy - 19:.1f}" '
+                   f'width="{plate_w:.1f}" height="12" rx="2" fill="#ffffff" opacity="0.88"/>')
         out.append(f'<text x="{cx:.1f}" y="{cy - 9:.1f}" text-anchor="middle" font-size="10" '
-                   f'fill="{BLUE}">{s:.2f}×</text>')
+                   f'fill="{BLUE}">{text}</text>')
     return out
 
 
@@ -199,8 +210,10 @@ def main() -> int:
     target.write_text("\n".join(parts), encoding="utf-8")
     print(f"wrote {target}")
     for row in runs:
+        cooc = (f"cooc {row['cooccurrence_s']:>6.1f}s "
+                if row.get("cooccurrence_s") is not None else "")
         print(f"  local[{row['parallelism']:>2}] total {row['total_s']:>6.1f}s "
-              f"cooc {row['cooccurrence_s']:>6.1f}s speedup {row['speedup']:.2f}x")
+              f"{cooc}speedup {row['speedup']:.2f}x")
     return 0
 
 

@@ -1,0 +1,85 @@
+{
+  "model": "spark-als",
+  "fraction": 0.2,
+  "ratings": 6357785,
+  "config": {
+    "rank": 20,
+    "iterations": 20,
+    "reg_param": 0.1,
+    "seed": 20261106
+  },
+  "runs": [
+    {
+      "master": "local[1]",
+      "parallelism": 1,
+      "ratings": 6357785,
+      "fraction": 0.2,
+      "config": {
+        "rank": 20,
+        "iterations": 20,
+        "reg_param": 0.1,
+        "seed": 20261106
+      },
+      "train_s": 218.5,
+      "throughput_ratings_per_s": 29100.6,
+      "rmse": 1.228477,
+      "total_s": 262.6,
+      "speedup": 1.0,
+      "efficiency": 1.0
+    },
+    {
+      "master": "local[2]",
+      "parallelism": 2,
+      "ratings": 6357442,
+      "fraction": 0.2,
+      "config": {
+        "rank": 20,
+        "iterations": 20,
+        "reg_param": 0.1,
+        "seed": 20261106
+      },
+      "train_s": 117.9,
+      "throughput_ratings_per_s": 53900.6,
+      "rmse": 1.278485,
+      "total_s": 149.9,
+      "speedup": 1.85,
+      "efficiency": 0.93
+    },
+    {
+      "master": "local[4]",
+      "parallelism": 4,
+      "ratings": 6359200,
+      "fraction": 0.2,
+      "config": {
+        "rank": 20,
+        "iterations": 20,
+        "reg_param": 0.1,
+        "seed": 20261106
+      },
+      "train_s": 76.5,
+      "throughput_ratings_per_s": 83165.9,
+      "rmse": 1.244092,
+      "total_s": 104.9,
+      "speedup": 2.86,
+      "efficiency": 0.71
+    },
+    {
+      "master": "local[8]",
+      "parallelism": 8,
+      "ratings": 6361216,
+      "fraction": 0.2,
+      "config": {
+        "rank": 20,
+        "iterations": 20,
+        "reg_param": 0.1,
+        "seed": 20261106
+      },
+      "train_s": 57.7,
+      "throughput_ratings_per_s": 110191.8,
+      "rmse": 1.242686,
+      "total_s": 87.3,
+      "speedup": 3.79,
+      "efficiency": 0.47
+    }
+  ]
+}

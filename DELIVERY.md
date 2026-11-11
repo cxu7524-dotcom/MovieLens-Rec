@@ -19,7 +19,7 @@
 | **bias μ+b_u+b_i（λ=20）** | **0.929663** | **+11.23%** | 已过 10% 目标 |
 | **itemcf（K=200, β=20）** | **0.926035** | **+11.58%** | **主交付** |
 | lsh 近似邻居 | 0.929677 | +11.22% | 实验，别用 |
-| spark ALS | **未完成** | - | 全量运行被取消，见 README 第 8 节 |
+| spark ALS（rank=20, iter=20, reg=0.1） | 0.987469 | +5.71% | 分布式对照，精度不如 bias |
 
 - 交付模型 = **ItemCF（K=200, β=20）**：val RMSE **0.926035**，绝对下降 0.121236，相对下降 **11.58%**。
 - 10% 目标线（我们的解释）：`RMSE ≤ 1.047271 × 0.9 = 0.942544`。bias 与 itemcf 都过线。
@@ -46,9 +46,9 @@
 | `results/baselines_val.json` + `results/table_baselines.md` | 基线阶梯 5 级 + λ 扫描 |
 | `results/v2_table_models.md` / `.csv` | 全模型 val RMSE/MAE/相对提升 + 两半区 |
 | `results/v2_table_efficiency.md` / `.csv` | 构建/预测耗时、峰值内存、吞吐 |
-| `results/v2_table_params.md` | ItemCF K×β 扫描、LSH 9 组网格（ALS 网格待补，见 `results/als_val_partial.json` 的 8/12 组） |
+| `results/v2_table_params.md` | ItemCF K×β 扫描、ALS 12 组网格、LSH 9 组网格 |
 | `results/table_lsh.md` | 精确 vs LSH 的 overlap@K / RMSE / 耗时 |
-| `results/v2_table_scaling.md` / `.csv` + `results/scaling_curve_als.svg` | **待补**：ALS 1/2/4/8 扩展性（全量运行取消，见 README 第 8 节） |
+| `results/v2_table_scaling.md` / `.csv` + `results/scaling_curve_als.svg` | ALS 1/2/4/8 扩展性表与曲线 |
 | `results/delivery_summary.json` | 选型、B0、目标线、两半区、待确认口径，一份汇总 |
 | `results/manifest_*.json` | 数据指纹（size/mtime/sha1 前 4 MiB）、参数、种子、环境 |
 

@@ -1,0 +1,16 @@
+{
+  "master": "local[2]",
+  "parallelism": 2,
+  "ratings": 6357442,
+  "fraction": 0.2,
+  "config": {
+    "rank": 20,
+    "iterations": 20,
+    "reg_param": 0.1,
+    "seed": 20261106
+  },
+  "train_s": 117.9,
+  "throughput_ratings_per_s": 53900.6,
+  "rmse": 1.278485,
+  "total_s": 149.9
+}

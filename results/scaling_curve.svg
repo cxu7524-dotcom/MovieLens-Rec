@@ -22,25 +22,35 @@
 <text x="260" y="342" text-anchor="middle" font-size="10" fill="#7b8794">并行度（local[N]）</text>
 <polyline points="76.0,93.7 100.6,137.5 149.7,162.9 247.9,161.8 444.4,151.5" fill="none" stroke="#2563eb" stroke-width="2" stroke-linejoin="round"/>
 <circle cx="76.0" cy="93.7" r="3" fill="#fff" stroke="#2563eb" stroke-width="2"/>
+<rect x="65.6" y="75.7" width="20.8" height="11" rx="2" fill="#ffffff" opacity="0.88"/>
 <text x="76.0" y="84.7" text-anchor="middle" font-size="9" fill="#2563eb">276</text>
 <circle cx="100.6" cy="137.5" r="3" fill="#fff" stroke="#2563eb" stroke-width="2"/>
+<rect x="90.2" y="119.5" width="20.8" height="11" rx="2" fill="#ffffff" opacity="0.88"/>
 <text x="100.6" y="128.5" text-anchor="middle" font-size="9" fill="#2563eb">220</text>
 <circle cx="149.7" cy="162.9" r="3" fill="#fff" stroke="#2563eb" stroke-width="2"/>
+<rect x="139.3" y="144.9" width="20.8" height="11" rx="2" fill="#ffffff" opacity="0.88"/>
 <text x="149.7" y="153.9" text-anchor="middle" font-size="9" fill="#2563eb">187</text>
 <circle cx="247.9" cy="161.8" r="3" fill="#fff" stroke="#2563eb" stroke-width="2"/>
+<rect x="237.5" y="143.8" width="20.8" height="11" rx="2" fill="#ffffff" opacity="0.88"/>
 <text x="247.9" y="152.8" text-anchor="middle" font-size="9" fill="#2563eb">189</text>
 <circle cx="444.4" cy="151.5" r="3" fill="#fff" stroke="#2563eb" stroke-width="2"/>
+<rect x="434.0" y="133.5" width="20.8" height="11" rx="2" fill="#ffffff" opacity="0.88"/>
 <text x="444.4" y="142.5" text-anchor="middle" font-size="9" fill="#2563eb">202</text>
 <polyline points="76.0,213.6 100.6,252.7 149.7,269.1 247.9,269.0 444.4,270.6" fill="none" stroke="#d97706" stroke-width="2" stroke-linejoin="round"/>
 <circle cx="76.0" cy="213.6" r="3" fill="#fff" stroke="#d97706" stroke-width="2"/>
+<rect x="65.6" y="195.6" width="20.8" height="11" rx="2" fill="#ffffff" opacity="0.88"/>
 <text x="76.0" y="204.6" text-anchor="middle" font-size="9" fill="#d97706">122</text>
 <circle cx="100.6" cy="252.7" r="3" fill="#fff" stroke="#d97706" stroke-width="2"/>
+<rect x="93.0" y="234.7" width="15.2" height="11" rx="2" fill="#ffffff" opacity="0.88"/>
 <text x="100.6" y="243.7" text-anchor="middle" font-size="9" fill="#d97706">71</text>
 <circle cx="149.7" cy="269.1" r="3" fill="#fff" stroke="#d97706" stroke-width="2"/>
+<rect x="142.1" y="251.1" width="15.2" height="11" rx="2" fill="#ffffff" opacity="0.88"/>
 <text x="149.7" y="260.1" text-anchor="middle" font-size="9" fill="#d97706">50</text>
 <circle cx="247.9" cy="269.0" r="3" fill="#fff" stroke="#d97706" stroke-width="2"/>
+<rect x="240.3" y="251.0" width="15.2" height="11" rx="2" fill="#ffffff" opacity="0.88"/>
 <text x="247.9" y="260.0" text-anchor="middle" font-size="9" fill="#d97706">50</text>
 <circle cx="444.4" cy="270.6" r="3" fill="#fff" stroke="#d97706" stroke-width="2"/>
+<rect x="436.8" y="252.6" width="15.2" height="11" rx="2" fill="#ffffff" opacity="0.88"/>
 <text x="444.4" y="261.6" text-anchor="middle" font-size="9" fill="#d97706">48</text>
 <line x1="280.36" y1="294" x2="298.36" y2="294" stroke="#2563eb" stroke-width="2"/>
 <text x="303.36" y="298" font-size="10" fill="#1f2933">总耗时</text>
@@ -69,13 +79,18 @@
 <text x="790.0" y="80" text-anchor="end" font-size="9" fill="#9aa5b1">理想线性 16× 在图外</text>
 <polyline points="512.4,187.9 530.3,156.6 566.3,130.2 638.2,131.4 782.0,143.4" fill="none" stroke="#2563eb" stroke-width="2.2"/>
 <circle cx="512.4" cy="187.9" r="3.2" fill="#fff" stroke="#2563eb" stroke-width="2"/>
+<rect x="495.4" y="168.9" width="34.0" height="12" rx="2" fill="#ffffff" opacity="0.88"/>
 <text x="512.4" y="178.9" text-anchor="middle" font-size="10" fill="#2563eb">1.00×</text>
 <circle cx="530.3" cy="156.6" r="3.2" fill="#fff" stroke="#2563eb" stroke-width="2"/>
+<rect x="513.3" y="137.6" width="34.0" height="12" rx="2" fill="#ffffff" opacity="0.88"/>
 <text x="530.3" y="147.6" text-anchor="middle" font-size="10" fill="#2563eb">1.26×</text>
 <circle cx="566.3" cy="130.2" r="3.2" fill="#fff" stroke="#2563eb" stroke-width="2"/>
+<rect x="549.3" y="111.2" width="34.0" height="12" rx="2" fill="#ffffff" opacity="0.88"/>
 <text x="566.3" y="121.2" text-anchor="middle" font-size="10" fill="#2563eb">1.48×</text>
 <circle cx="638.2" cy="131.4" r="3.2" fill="#fff" stroke="#2563eb" stroke-width="2"/>
+<rect x="621.2" y="112.4" width="34.0" height="12" rx="2" fill="#ffffff" opacity="0.88"/>
 <text x="638.2" y="122.4" text-anchor="middle" font-size="10" fill="#2563eb">1.47×</text>
 <circle cx="782.0" cy="143.4" r="3.2" fill="#fff" stroke="#2563eb" stroke-width="2"/>
+<rect x="765.0" y="124.4" width="34.0" height="12" rx="2" fill="#ffffff" opacity="0.88"/>
 <text x="782.0" y="134.4" text-anchor="middle" font-size="10" fill="#2563eb">1.37×</text>
 </svg>

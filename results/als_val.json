@@ -1,0 +1,167 @@
+{
+  "model": "spark-als",
+  "best_config": {
+    "rank": 20,
+    "iterations": 20,
+    "reg_param": 0.1,
+    "seed": 20261106
+  },
+  "tuning": {
+    "fraction": 0.1,
+    "ratings": 3180386,
+    "grid": [
+      {
+        "rank": 20,
+        "iterations": 10,
+        "reg_param": 0.01,
+        "seed": 20261106,
+        "rmse": 1.587508,
+        "mae": 1.221373,
+        "fit_s": 36.8
+      },
+      {
+        "rank": 20,
+        "iterations": 10,
+        "reg_param": 0.1,
+        "seed": 20261106,
+        "rmse": 1.176377,
+        "mae": 0.922823,
+        "fit_s": 31.1
+      },
+      {
+        "rank": 20,
+        "iterations": 20,
+        "reg_param": 0.01,
+        "seed": 20261106,
+        "rmse": 1.624415,
+        "mae": 1.252698,
+        "fit_s": 43.2
+      },
+      {
+        "rank": 20,
+        "iterations": 20,
+        "reg_param": 0.1,
+        "seed": 20261106,
+        "rmse": 1.135242,
+        "mae": 0.88969,
+        "fit_s": 46.8
+      },
+      {
+        "rank": 50,
+        "iterations": 10,
+        "reg_param": 0.01,
+        "seed": 20261106,
+        "rmse": 1.784025,
+        "mae": 1.390601,
+        "fit_s": 72.2
+      },
+      {
+        "rank": 50,
+        "iterations": 10,
+        "reg_param": 0.1,
+        "seed": 20261106,
+        "rmse": 1.18926,
+        "mae": 0.93592,
+        "fit_s": 60.1
+      },
+      {
+        "rank": 50,
+        "iterations": 20,
+        "reg_param": 0.01,
+        "seed": 20261106,
+        "rmse": 1.579932,
+        "mae": 1.230061,
+        "fit_s": 103.8
+      },
+      {
+        "rank": 50,
+        "iterations": 20,
+        "reg_param": 0.1,
+        "seed": 20261106,
+        "rmse": 1.149963,
+        "mae": 0.903981,
+        "fit_s": 96.8
+      },
+      {
+        "rank": 100,
+        "iterations": 10,
+        "reg_param": 0.01,
+        "seed": 20261106,
+        "rmse": 1.714678,
+        "mae": 1.339749,
+        "fit_s": 169.5
+      },
+      {
+        "rank": 100,
+        "iterations": 10,
+        "reg_param": 0.1,
+        "seed": 20261106,
+        "rmse": 1.198175,
+        "mae": 0.944035,
+        "fit_s": 167.4
+      },
+      {
+        "rank": 100,
+        "iterations": 20,
+        "reg_param": 0.01,
+        "seed": 20261106,
+        "rmse": 1.402365,
+        "mae": 1.101151,
+        "fit_s": 316.6
+      },
+      {
+        "rank": 100,
+        "iterations": 20,
+        "reg_param": 0.1,
+        "seed": 20261106,
+        "rmse": 1.155098,
+        "mae": 0.909484,
+        "fit_s": 338.5
+      }
+    ]
+  },
+  "full": {
+    "ratings": 31800204,
+    "train_s": 113.7,
+    "throughput_ratings_per_s": 279768.4,
+    "name": "als_val",
+    "stage": "val",
+    "n_pairs": 99998,
+    "n_users": 5498,
+    "clipped": false,
+    "evaluated_at": "2026-11-11 15:52:21",
+    "data": {
+      "pairs": "D:\\movie-rec\\data\\hybrid\\val_pairs.parquet",
+      "ratings": "D:\\movie-rec\\data\\hybrid\\ratings.csv"
+    },
+    "rmse": 0.987469,
+    "mae": 0.7755,
+    "weighting": "pair",
+    "rmse_pair_weighted": 0.987469,
+    "rmse_user_weighted": 0.901574,
+    "by_half": {
+      "movielens32m": {
+        "rmse": 0.970328,
+        "mae": 0.754353,
+        "n_pairs": 48078,
+        "n_users": 2776,
+        "weighting": "pair"
+      },
+      "synthetic": {
+        "rmse": 1.003081,
+        "mae": 0.795083,
+        "n_pairs": 51920,
+        "n_users": 2722,
+        "weighting": "pair"
+      }
+    },
+    "pred_min": 0.5,
+    "pred_max": 5.0,
+    "truth_mean": 3.540691,
+    "bias": -0.229086,
+    "elapsed_s": 0.08
+  },
+  "parallelism": 16,
+  "master": "local[*]",
+  "total_s": 1634.9
+}
