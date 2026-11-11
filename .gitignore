@@ -18,6 +18,8 @@ results/*.parquet
 # v2 deliverables are small (~2 MB) and must travel with the repo:
 # pred_test.csv is the file member one/four score, pred_val.csv the val twin.
 !results/pred_*.csv
+# Submission file for the teacher: test_pairs with pred_rating appended.
+!results/test_pairs_predicted.csv
 !results/v2_table_*.csv
 
 # Historical debug leftovers at the project root.
