@@ -11,6 +11,7 @@ course already requires, and it pastes into Word/PowerPoint at any size.
 
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 from pathlib import Path
@@ -36,7 +37,8 @@ def _scale(value: float, lo: float, hi: float, out_lo: float, out_hi: float) -> 
     return out_lo + (value - lo) * (out_hi - out_lo) / (hi - lo)
 
 
-def _panel(x0: float, width: float, runs: list[dict], title: str) -> list[str]:
+def _panel(x0: float, width: float, runs: list[dict], title: str,
+           total_label: str = "总耗时", second_label: str = "共现阶段") -> list[str]:
     """One chart: x = parallelism, y depends on the caller's series."""
     top, bottom = PAD_T, H - PAD_B
     out = [f'<text x="{x0 + width / 2:.0f}" y="{top - 22}" text-anchor="middle" '
@@ -70,7 +72,10 @@ def _panel(x0: float, width: float, runs: list[dict], title: str) -> list[str]:
     out.append(f'<text x="{x0 + width / 2:.0f}" y="{bottom + 34}" text-anchor="middle" '
                f'font-size="10" fill="{MUTED}">并行度（local[N]）</text>')
 
-    for series, colour, label in ((totals, BLUE, "总耗时"), (coocs, ORANGE, "共现阶段")):
+    series_spec = [(totals, BLUE, total_label)]
+    if all(v is not None for v in coocs):
+        series_spec.append((coocs, ORANGE, second_label))
+    for series, colour, label in series_spec:
         points = " ".join(f"{px(i):.1f},{_scale(v, y_lo, y_hi, bottom, top):.1f}"
                           for i, v in enumerate(series))
         out.append(f'<polyline points="{points}" fill="none" stroke="{colour}" '
@@ -84,7 +89,9 @@ def _panel(x0: float, width: float, runs: list[dict], title: str) -> list[str]:
 
     # legend, bottom-right where the falling curves leave room
     ly = bottom - 14
-    for j, (colour, label) in enumerate(((BLUE, "总耗时"), (ORANGE, "共现阶段"))):
+    for j, (colour, label) in enumerate(
+            [(BLUE, total_label)] + ([(ORANGE, second_label)]
+                                    if len(series_spec) > 1 else [])):
         lx = x0 + width - 178 + j * 92
         out.append(f'<line x1="{lx}" y1="{ly}" x2="{lx + 18}" y2="{ly}" stroke="{colour}" '
                    f'stroke-width="2"/>')
@@ -142,14 +149,37 @@ def _speedup_panel(x0: float, width: float, runs: list[dict]) -> list[str]:
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--als", action="store_true",
+                        help="plot the v2 ALS scaling series instead of the v1 ItemCF one")
+    args = parser.parse_args()
     settings = load_settings()
     out_dir = settings.project_root / "results"
-    path = out_dir / "spark_scaling_val.json"
+    path = out_dir / ("als_scaling_val.json" if args.als else "spark_scaling_val.json")
     if not path.is_file():
-        print(f"missing {path}; run scripts/run_spark_itemcf.py --scaling first")
+        print(f"missing {path}; run the scaling experiment first")
         return 1
     data = json.loads(path.read_text(encoding="utf-8"))
-    runs = data["runs"]
+    if args.als:
+        runs = [{
+            "parallelism": r["parallelism"],
+            "total_s": r["train_s"],
+            "cooccurrence_s": None,
+            "speedup": r["speedup"],
+            "pairs_per_s": r["throughput_ratings_per_s"],
+        } for r in data["runs"]]
+        cfg = data.get("config", {})
+        title = (f'Spark ALS 扩展性（{data["ratings"]:,} 条评分 = '
+                 f'{data["fraction"]:.0%} 样本，rank={cfg.get("rank")} '
+                 f'iter={cfg.get("iterations")} reg={cfg.get("reg_param")}）')
+        total_label = "训练耗时"
+        target = out_dir / "scaling_curve_als.svg"
+    else:
+        runs = data["runs"]
+        title = (f'Spark ItemCF 扩展性（val，{data.get("users_sampled"):,} 用户抽样，'
+                 f'topk={data["topk"]}，每块 {data["block_items"]} 部电影）')
+        total_label = "总耗时"
+        target = out_dir / "scaling_curve.svg"
 
     left_w = (W - PAD_L - PAD_R) * 0.54
     right_w = (W - PAD_L - PAD_R) - left_w - 40
@@ -157,15 +187,15 @@ def main() -> int:
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" '
         f'viewBox="0 0 {W} {H}" font-family="{FONT}">',
         f'<rect width="{W}" height="{H}" fill="#ffffff"/>',
-        f'<text x="{PAD_L}" y="24" font-size="14" font-weight="700" fill="{INK}">'
-        f'Spark ItemCF 扩展性（val，{data.get("users_sampled"):,} 用户抽样，'
-        f'topk={data["topk"]}，每块 {data["block_items"]} 部电影）</text>',
+        f'<text x="{PAD_L}" y="24" font-size="14" font-weight="700" '
+        f'fill="{INK}">{title}</text>',
     ]
-    parts += _panel(PAD_L, left_w, runs, "各阶段耗时")
+    parts += _panel(PAD_L, left_w, runs,
+                    "各阶段耗时" if not args.als else "训练耗时",
+                    total_label=total_label)
     parts += _speedup_panel(PAD_L + left_w + 40, right_w, runs)
     parts.append("</svg>")
 
-    target = out_dir / "scaling_curve.svg"
     target.write_text("\n".join(parts), encoding="utf-8")
     print(f"wrote {target}")
     for row in runs:

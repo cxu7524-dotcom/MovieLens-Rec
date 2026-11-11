@@ -1,12 +1,14 @@
-"""Command line wrapper around :mod:`movie_rec.eval`.
+"""Score a prediction file with RMSE.
 
-    python scripts/evaluate.py --scores results/scores_popular_val.csv \
-        --stage val --name popular_val
+    python scripts/evaluate.py --pred results/pred_val.csv --stage val --name itemcf_val
 
-Writes ``results/metrics_<name>.json`` and prints the headline numbers.
-Use ``--sample-users`` for a fast sanity check while iterating; the number in
-the report records the sample size so a sampled run is never mistaken for a
-full one.
+The file must be ``userId,movieId,pred_rating`` and cover every pair of the
+stage exactly once. ``--clip`` clamps predictions to [0.5, 5.0] before scoring;
+the models already do this, the flag is here so a hand-made file can be checked
+the same way. Writes ``results/metrics_<name>.json``.
+
+The retired NDCG evaluator is still importable from ``movie_rec.eval`` (the
+Top-N demo scripts call it directly); this CLI now speaks RMSE only.
 """
 
 from __future__ import annotations
@@ -19,48 +21,49 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from movie_rec.config import load_settings  # noqa: E402
-from movie_rec.eval import evaluate, write_report  # noqa: E402
+from movie_rec.eval import (  # noqa: E402
+    evaluate_ratings,
+    read_predictions,
+    write_rating_report,
+)
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--scores", required=True, help="userId,movieId,score file")
+    parser.add_argument("--pred", required=True, help="userId,movieId,pred_rating")
     parser.add_argument("--stage", required=True, choices=["val", "test"])
-    parser.add_argument("--name", required=True, help="report name, e.g. popular_val")
-    parser.add_argument("--k", type=int, default=None, help="cutoff (default: protocol)")
-    parser.add_argument("--sample-users", type=int, default=None)
+    parser.add_argument("--name", required=True, help="report name, e.g. itemcf_val")
+    parser.add_argument("--weighting", default=None, choices=["pair", "user"])
+    parser.add_argument("--clip", action="store_true", help="clamp to [0.5, 5.0] first")
     parser.add_argument("--out", default=None, help="default: results/metrics_<name>.json")
     args = parser.parse_args()
 
     settings = load_settings()
-    result = evaluate(
+    predictions = read_predictions(args.pred)
+    result = evaluate_ratings(
         name=args.name,
         stage=args.stage,
-        scores_path=args.scores,
+        predictions=predictions,
         settings=settings,
-        k=args.k,
-        sample_users=args.sample_users,
+        weighting=args.weighting,
+        clip=args.clip,
     )
     out = Path(args.out) if args.out else settings.project_root / "results" / f"metrics_{args.name}.json"
-    write_report(result, out)
+    write_rating_report(result, out)
 
     report = result.report
-    k = report["k"]
     print(json.dumps(report, indent=2, ensure_ascii=False))
     print()
-    if report[f"ndcg@{k}"] is None:
-        print(
-            f"{args.name}: test stage, no labels. users={report['users']:,} "
-            f"pairs={report['pairs']:,} coverage={report['coverage']:.4f} "
-            f"missing={report['missing_pairs']:,} in {report['elapsed_s']}s"
-        )
+    if report["rmse"] is None:
+        print(f"{args.name}: test stage, {report['n_pairs']:,} pairs covered, "
+              f"{report['n_users']:,} users, no local labels")
     else:
-        print(
-            f"{args.name}: NDCG@{k}={report[f'ndcg@{k}']:.4f} "
-            f"Recall@{k}={report[f'recall@{k}']:.4f} "
-            f"coverage={report['coverage']:.4f} users={report['users']:,} "
-            f"missing={report['missing_pairs']:,} in {report['elapsed_s']}s"
-        )
+        print(f"{args.name}: RMSE={report['rmse']:.6f} MAE={report['mae']:.6f} "
+              f"pairs={report['n_pairs']:,} users={report['n_users']:,} "
+              f"bias={report['bias']:+.4f} ({report['elapsed_s']}s)")
+        for half, metrics in report.get("by_half", {}).items():
+            print(f"    {half:<13} RMSE={metrics['rmse']:.6f} "
+                  f"MAE={metrics['mae']:.6f} pairs={metrics['n_pairs']:,}")
     print(f"report -> {out}")
     return 0
 

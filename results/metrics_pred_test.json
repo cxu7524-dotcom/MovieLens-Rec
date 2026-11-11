@@ -1,0 +1,17 @@
+{
+  "name": "pred_test",
+  "stage": "test",
+  "n_pairs": 100000,
+  "n_users": 5498,
+  "clipped": false,
+  "evaluated_at": "2026-11-11 14:58:32",
+  "data": {
+    "pairs": "D:\\movie-rec\\data\\hybrid\\test_pairs.csv",
+    "ratings": "D:\\movie-rec\\data\\hybrid\\ratings.csv"
+  },
+  "rmse": null,
+  "mae": null,
+  "weighting": "pair",
+  "note": "test stage has no local labels; shape and coverage only",
+  "elapsed_s": 0.05
+}

@@ -15,6 +15,10 @@ results/*.npz
 results/*.parquet
 # ...but the small summary tables are deliverables for member four, keep them.
 !results/table_*.csv
+# v2 deliverables are small (~2 MB) and must travel with the repo:
+# pred_test.csv is the file member one/four score, pred_val.csv the val twin.
+!results/pred_*.csv
+!results/v2_table_*.csv
 
 # Historical debug leftovers at the project root.
 tmp*/

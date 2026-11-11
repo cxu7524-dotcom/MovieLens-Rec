@@ -1,208 +1,114 @@
-# 成员二交付说明
+# 成员二交付说明（v2：评分预测 / RMSE）
 
-面向 **成员三（排序/集成）** 与 **成员四（评测/报告）**。工程细节看 `README.md`，这份只说「拿什么、怎么用、哪里有坑」。
+面向 **成员一（数据+最终评分）**、**成员三（展示 Top-10）**、**成员四（报告）**。工程细节看 `README.md`；这份只说「拿什么、怎么用、哪里有坑」。
+
+> **v1（NDCG / Top-10 候选排序）已于 2026-11-10 作废**，相关文件仍保留在仓库里作「推荐模块展示」补充实验，但**不能用于本次验收**。本文件全部是 v2 口径。
 
 ---
 
 ## 0. 三十秒摘要
 
-| 模型 | NDCG@10 | Recall@10 | 覆盖率 | 状态 |
-|---|---|---|---|---|
-| random（自检下限） | 0.0876 | 0.0935 | 1.0000 | 参考 |
-| **popular = B0（及格线）** | **0.8752** | **0.8639** | 0.1637 | 基线 |
-| **itemcf 精确（K=200）** | **0.9319** | **0.8756** | 0.3312 | **主交付** |
-| itemcf Spark（local[16]） | 0.9319 | 0.8756 | 0.3312 | 与单机完全一致 |
-| LSH（交付版 bands=64, rows=1） | 0.9133 | 0.8612 | 0.2583 | 仅作实验，别融合 |
+**正式任务**：对 `test_pairs.csv` 的 100,000 个 (userId, movieId) 预测评分，用 RMSE 评价。
 
-- itemcf 相对 B0：**NDCG +0.0567（+6.49%）**，Recall +0.0117（+1.35%）。
-- 任务书要求 +10% → 目标 NDCG **0.9627**，还差 **0.0308**。**这个差距不是靠调参能补的，见第 5 节。**
+| 模型 | val RMSE | 相对 B0 | 状态 |
+|---|---|---|---|
+| random（自检） | 1.842889 | -76.0% | 下限 |
+| **global mean = B0（及格线）** | **1.047271** | 0 | 基线 |
+| user mean | 1.111734 | -6.16% | 比 B0 差 |
+| item mean | 0.948220 | +9.46% | 参考 |
+| **bias μ+b_u+b_i（λ=20）** | **0.929663** | **+11.23%** | 已过 10% 目标 |
+| **itemcf（K=200, β=20）** | **0.926035** | **+11.58%** | **主交付** |
+| lsh 近似邻居 | 0.929677 | +11.22% | 实验，别用 |
+| spark ALS | **未完成** | - | 全量运行被取消，见 README 第 8 节 |
+
+- 交付模型 = **ItemCF（K=200, β=20）**：val RMSE **0.926035**，绝对下降 0.121236，相对下降 **11.58%**。
+- 10% 目标线（我们的解释）：`RMSE ≤ 1.047271 × 0.9 = 0.942544`。bias 与 itemcf 都过线。
+- 两半区：MovieLens **0.885868** / 合成 **0.961735**。ItemCF 在合成半区**不如 bias**（0.9617 vs 0.9593），说明它偏向 ML 分布。
+- **口径待老师确认**：10% 的定义、RMSE 是否按用户加权。两项都已在 README 第 10 节写明，不阻塞交付。
 
 ---
 
 ## 1. 文件清单：谁拿什么
 
-### 给成员三（排序/集成）
+### 给成员一 / 成员四（算最终 test RMSE）
 
-**只要 2 个文件就够跑通，第 3 个是可选对照。** 已转好 parquet，单文件 77 MB，微信能传。
+| 文件 | 行数 | 说明 |
+|---|---|---|
+| **`results/pred_test.csv`** | **100,000** | **唯一交付文件**：`userId,movieId,pred_rating`，覆盖 `test_pairs.csv` 每一行、不多不少，已 clip 到 [0.5, 5.0]，实测范围 [0.5349, 5.0000] |
 
-| 文件 | 行数 | parquet | 必要性 | 用途 |
-|---|---|---|---|---|
-| `results/scores_itemcf_val.parquet` | 20,281,548 | **76.7 MB** | **必需** | val 召回分，训练/调排序模型 |
-| `results/scores_itemcf_test.parquet` | 20,660,431 | **78.1 MB** | **必需** | test 召回分，生成最终 Top-10 |
-| `results/scores_popular_val.parquet` | 20,281,548 | 83.4 MB | 可选 | 融合兜底路 + B0 对照 |
-| `results/scores_lsh_val.parquet` | 20,281,548 | 52.1 MB | 可选 | **仅供对比，别进融合** |
-| `results/scores_lsh_test.parquet` | 20,660,431 | 53.1 MB | 不用给 | 同上，且 test 无标签 |
-| `results/scores_spark_itemcf_test.parquet` | 20,660,431 | 78.1 MB | **不用给** | 与 `itemcf_test` **逐字节等价**，给一份就行 |
+标签在老师/成员一处，本地算不出 test RMSE；拿到标签后直接用第 4 节的命令跑。
 
-- 最小交接包：**155 MB**（两个 parquet）。
-- **下载地址（不用等人发文件）**：
-  - https://github.com/cxu7524-dotcom/MovieLens-Rec/releases/download/scores-v1/scores_itemcf_val.parquet
-  - https://github.com/cxu7524-dotcom/MovieLens-Rec/releases/download/scores-v1/scores_itemcf_test.parquet
-  - Release 页：https://github.com/cxu7524-dotcom/MovieLens-Rec/releases/tag/scores-v1
-- 原 CSV 合计 2.8 GB，parquet 压 6.1 倍，已验证**行数、列名、dtype、score 总和完全一致**。
-- 读取：`pd.read_parquet('results/scores_itemcf_val.parquet')`，pandas 直接认，不用装额外东西（pyarrow 已在 requirements）。
-- 想自己从 CSV 转：`scripts/run_all.py --only itemcf` 重跑，或按上面命令 `to_parquet(compression='zstd')`。
-- 也可以不给文件、只给仓库地址让对方跑（`run_all.py --only itemcf`，2.5 分钟，峰值 3.8 GB）。
-
-> **test 分数不是终点**：成员三用它出 Top-10 后，最终 test 指标要由**能拿到 test 标签的人**（成员一 / 成员四）来算。所以 `scores_itemcf_test` 最终会在成员三 → 成员一/四之间再流转一次，别只发给成员三就完事。
-
-### 给成员四（评测/报告）
+### 给成员四（写报告）
 
 | 文件 | 内容 |
 |---|---|
-| `results/table_quality.md` / `.csv` | 近似质量表：26 行，含 13 组 LSH 参数 |
-| `results/table_efficiency.md` / `.csv` | 效率对比：耗时、峰值内存、单用户延迟、吞吐 |
-| `results/table_scaling.md` / `.csv` | 扩展性：并行度 1/2/4/8/16 |
-| `results/scaling_curve.svg` | 扩展性曲线（左：分阶段耗时；右：加速比 + 1.0× 参考线） |
-| `results/lsh_val.json` | 13 组参数原始数据 + overlap + 签名耗时 |
-| `results/itemcf_val.json` | K 扫描、相似度构建耗时、峰值内存 |
-| `results/spark_scaling_val.json` | 扩展性原始数据 |
-| `results/manifest_*.json` | 数据指纹（sha1 前 4 MiB）、参数、种子、环境，复现用 |
+| `results/pred_val.csv` | val 预测（99,998 行），可与标签复算 |
+| `results/baselines_val.json` + `results/table_baselines.md` | 基线阶梯 5 级 + λ 扫描 |
+| `results/v2_table_models.md` / `.csv` | 全模型 val RMSE/MAE/相对提升 + 两半区 |
+| `results/v2_table_efficiency.md` / `.csv` | 构建/预测耗时、峰值内存、吞吐 |
+| `results/v2_table_params.md` | ItemCF K×β 扫描、LSH 9 组网格（ALS 网格待补，见 `results/als_val_partial.json` 的 8/12 组） |
+| `results/table_lsh.md` | 精确 vs LSH 的 overlap@K / RMSE / 耗时 |
+| `results/v2_table_scaling.md` / `.csv` + `results/scaling_curve_als.svg` | **待补**：ALS 1/2/4/8 扩展性（全量运行取消，见 README 第 8 节） |
+| `results/delivery_summary.json` | 选型、B0、目标线、两半区、待确认口径，一份汇总 |
+| `results/manifest_*.json` | 数据指纹（size/mtime/sha1 前 4 MiB）、参数、种子、环境 |
+
+### 给成员三（展示 Top-10）
+
+以前按 `score` 排序，现在改成**按预测评分排序**：
+
+- `results/pred_val.csv` / `results/pred_test.csv` 的第三列 `pred_rating` 就是排序键，降序取前 10 即可。
+- **不要再接旧的 `scores_*.csv`**（三列 `score`，v1 口径，已作废）。
+- 若要排除已看：用训练集里该用户已评分的电影做过滤（注意 test 对本身不在训练集里）。
 
 ---
 
-## 2. 分数文件契约（照抄，别改）
+## 2. 预测文件契约（照抄，别改）
 
 ```
-userId,movieId,score
-1,298,0.233243
+userId,movieId,pred_rating
+1,80,3.912441
 ```
 
 - **有表头**，三列，逗号分隔。
-- **覆盖候选集每一对**，一个不多一个不少（已校验 `missing_pairs=0 / extra_pairs=0`）。
-- 缺失或算不出的对**填 0，不要丢行**——丢行会让排序错位。
-- 排序规则：同一 `userId` 内按 `score` 降序，**同分按候选文件原始顺序**（评测器就是这么断的，保持一致才能复现）。
+- **必须覆盖该阶段每一对，一个不多一个不少**；评测器会硬校验：重复对 / 缺对 / 多对 / NaN / 越界（不在 [0.5, 5.0]）**直接报错**。
+- **clip 到 [0.5, 5.0]**：这是白捡的 RMSE 改善，别省。
+- 行顺序无关（评测器按 `(userId, movieId)` 对齐），但别丢行。
 
 ---
 
 ## 3. 四个必须知道的坑
 
-1. **分数跨文件不可比。** itemcf 是余弦累加（0 ~ 数十），popular / lsh 归一化到 [0,1]。融合前**各自归一化**（min-max 或按用户内最大值），别直接相加。
-2. **LSH 那两列不要当召回源用。** 见第 6 节，它在题目要求的参数网格内连 B0 都打不过。
-3. **test 阶段没有标签。** `scores_*_test.csv` 只能由成员一验；你手上只能验 val。
-4. **别自己重算 NDCG。** 用 `scripts/evaluate.py`，口径写死在 `conf/base.toml`。口径不一致，四个人的数字永远对不上。
+1. **别按 `hidden_cutoff_timestamp` 过滤训练集。** 它是全局截断，训练集里有 31,806 条晚于它的**合法**记录（其他用户的）。按它过滤会丢数据。
+2. **user mean 比全局均值更差**（-6.16%）。测试用户是重活跃用户，个人均值被长尾低分拉偏。任何「按用户归一化」的想法先看这条。
+3. **LSH 那套别进融合**（overlap@100 0.91%，RMSE 退回 bias，还更慢）。
+4. **test 无标签**，`pred_test.csv` 只能交给成员一/四验；本地只能验 val。
 
 ---
 
 ## 4. 评测口径（全队唯一）
 
 ```powershell
-.\.venv\Scripts\python.exe scripts\evaluate.py --scores results\scores_itemcf_val.csv --stage val --name itemcf_val
+# val（本地有标签）
+.\.venv\Scripts\python.exe scripts\evaluate.py --pred results\pred_val.csv --stage val --name pred_val
+
+# test（只校验形状与覆盖，RMSE 需要标签）
+.\.venv\Scripts\python.exe scripts\evaluate.py --pred results\pred_test.csv --stage test --name pred_test
 ```
 
-- 正样本：`validation.csv` 中 `rating >= 4.0`。
-- NDCG@10：gain=1，discount=`1/log2(rank+1)`，IDCG 用**该用户在候选集内**的正样本数。
-- Recall@10：命中数 / 该用户在候选集内的正样本数。
-- 覆盖率：所有人 top-10 出现过的电影数 / 候选集内电影数（87,585）。
-- 输出 `results/metrics_<name>.json`，含 `hits / positives_in_candidates / missing_pairs`，可自检。
-
-**已独立复算验证**：抽 3,135 用户用朴素 Python 重写一遍，NDCG 0.9295 / Recall 0.8710，与评测器 0.9319 / 0.8756 一致（差异来自抽样）。评测器可信。
+- RMSE = `sqrt(mean((pred − truth)^2))`，**pair 等权（micro）**，与老师描述一致；同时输出 `rmse_user_weighted`（macro）备查。
+- 两半区（MovieLens / 合成）按 `id_ranges.json` 的电影 ID 分界 87,585 拆开报。
+- 输出 `results/metrics_<name>.json`，含 `n_pairs / n_users / rmse / mae / by_half / pred_min / pred_max`。
 
 ---
 
-## 5. 关键发现：+10% 到底有多难（这条最重要）
-
-### 5.1 Recall 上 +10% 是数学不可能的
-
-候选集构造是「该阶段正样本 + 100 负样本」，用户正样本数中位数 4、均值 7.83、最大 552，**20.9% 的用户正样本超过 10 个**。
-
-因此 Recall@10 的理论上限是：
-
-```
-mean over users of  min(10, npos) / npos  =  0.9110
-```
-
-而 +10% 要求 **0.9503 > 0.9110**。**无论模型多强，Recall@10 都到不了。** 报告里不要再拿 Recall 说「离目标差多少」，会被问死。
-
-### 5.2 NDCG 的差距集中在「只有 1~2 个正样本」的用户
-
-按候选内正样本数分桶（itemcf，val）：
-
-| 桶（npos） | 用户数 | 占比 | NDCG@10 |
-|---|---|---|---|
-| 1–2 | 54,058 | 28.7% | **0.8944** |
-| 3–4 | 43,661 | 23.2% | 0.9412 |
-| 5–8 | 40,070 | 21.3% | 0.9492 |
-| 9–10 | 11,043 | 5.9% | 0.9221 |
-| 11–20 | 24,735 | 13.2% | 0.9482 |
-| 21–50 | 12,410 | 6.6% | 0.9742 |
-| 50+ | 2,110 | 1.1% | 0.9845 |
-
-- **正样本多的用户已经接近满分**（0.97~0.98），那里没有空间。
-- 缺口全在 npos ≤ 2 的 28.7% 用户身上：这一桶贡献了 `0.287 × 0.1056 ≈ 0.030` 的损失，**正好等于全部差距 0.0308**。
-- 其中 npos=1 的 22,559 人 **hit@1 只有 0.7568**；npos=2 的 31,499 人 hit@1 是 0.8664。
-
-### 5.3 结论与建议
-
-要把整体从 0.9319 推到 0.9627，等于要求 npos≤2 的用户 hit@1 从 0.76/0.87 提到 **0.94 左右**——这是 leave-one-out 最难的场景，靠特征工程提升 20 个点不现实。**按当前候选集口径，+10% 大概率达不到，最终落点估计 0.94~0.95（+7%~+8%）。**
-
-给成员三的方向（按性价比排序）：
-
-1. **只优化 npos≤2 的用户**：这 28.7% 的用户决定了能不能达标。特征是「用户最近行为 + 该候选是否在其 genre 偏好内 + 与已看高分片的相似度」，别把精力放在已经 0.98 的活跃用户上。
-2. **融合优先级**：`itemcf 分 + popular 分`（两路就够，LSH 别加）先做一版，看 npos≤2 桶有没有动。
-3. **不要指望排序模型救全局**：LightGBM 在这类「1 正 + 100 负」的候选集上通常只涨 1~2 个点。
-
-给成员四的写法（**建议现在就定，别等到 W6**）：
-
-- 主表按 NDCG@10 报，同时报 **绝对提升（+5.67 点）** 和 **相对提升（+6.49%）**，两个都给。
-- 加一行「**oracle 上限**」：NDCG@10 上限 1.0，Recall@10 上限 0.9110。用它解释为什么相对提升在接近天花板时天然收窄。
-- 加一段「**候选集口径的影响**」：负样本 43% 是训练集里没出现过的冷门片（正样本电影训练正反馈次数中位数 4,126，负样本 1），所以热门排序天然占便宜，B0 被抬到 0.8752。**这是数据构造造成的，不是基线太强。**
-- 如果老师认可，可以**补一套全库推荐口径**（不限制候选集）的对比：那种口径下 B0 会掉到 0.1 量级，相对提升远超 10%。这是唯一能"合规地"满足 +10% 字面要求的做法，但需要先跟老师确认口径。
-
----
-
-## 6. LSH 是负结果，报告里必须这么写
-
-题目要求的网格是 `bands ∈ {16,32,64} × rows ∈ {4,8,16}`。**网格内最好的配置（bands=64, rows=4）：**
-
-| 指标 | 值 |
-|---|---|
-| NDCG@10 | **0.7127**（B0 是 0.8752，**连及格线都过不了**） |
-| overlap@100（与精确 Top-100 邻居的重合率） | **0.1361** |
-| 生成耗时 | 21.7 s（精确版 25.4 s，只有 1.2×） |
-| 加上 MinHash 签名 63.2 s | 总耗时反而 **比精确版慢** |
-
-交付文件用的是 `bands=64, rows=1`（NDCG 0.9133），**这是超出题目网格的诊断配置**，代价是：生成 118 s + 签名 63 s（比精确版慢 4.6 倍）、峰值内存 11.2 GB（精确版 3.8 GB）。**任何地方引用 0.9133 都必须同时说明这一点**，否则答辩会被追问"为什么不用 4/8/16"。
-
-**为什么失败（报告的核心论点）**：精确 Top-100 邻居的 Jaccard 中位数只有 **0.083**（10 分位 0.007，90 分位 1.0）。banding 命中概率约 `s^rows`，`rows=4` 时对 0.083 只有 0.005%，`rows≥8` 基本为 0。LSH 能稳定捞到的只有 Jaccard≈1 的近似重复项，而真正的邻居全是低 Jaccard 对。**这是 MinHash 的适用边界，不是实现问题。**
-
-报告里别写「LSH 没用」，写「**我们量化了 MinHash-LSH 在本数据上的适用边界：需要 rows≤2 才能保住 34%~48% 邻居召回，此时候选对涨到 700~3,900 万，加速完全消失**」。这是正面结论。
-
----
-
-## 7. 复现
+## 5. 复现
 
 ```powershell
 cd D:\movie-rec
 $env:PYTHONPATH=""
-
-.\.venv\Scripts\python.exe -m pytest tests -q          # 15 个单测，约 10 s
-.\.venv\Scripts\python.exe scripts\run_all.py --fast   # 评测器自检 + B0 + 表格，约 5 min
-.\.venv\Scripts\python.exe scripts\run_all.py          # 全流程，约 70 min
-.\.venv\Scripts\python.exe scripts\run_all.py --only itemcf tables   # 只跑某几步
+.\.venv\Scripts\python.exe scripts\run_all.py              # v2 全流程，约 2 小时
+.\.venv\Scripts\python.exe scripts\run_all.py --fast       # 只跑轻量校验，约 1 分钟
+.\.venv\Scripts\python.exe scripts\run_all.py --legacy     # 旧 v1 NDCG 展示链路
 ```
 
-依赖：pandas 3.1.0 / numpy 2.4.6 / scipy 1.17.1 / pyarrow 26.0.0 / pyspark 3.5.3 / **Java 17**（Spark 3.5 不支持 Java 21，`conf/local.toml` 里指 JDK 路径）。
-
-数据不在仓库里（`data/` 已 gitignore），需要成员一的 `data.zip` 解压到 `data/official/`，然后跑 `scripts/verify_official_data.py` 验收。
-
----
-
-## 8. 已知问题（别当成 bug）
-
-1. **Spark 慢**：全量 val 441 s，单机分块版 142 s。固定开销（启动 + 读 CSV + pandas→Spark 转换）占 130~180 s，与核数无关，所以总加速比封顶 1.48×（4 核），16 核反而回落到 1.37×。**结论写成「本规模下 Spark 不划算，价值在数据量再涨一个数量级」**，这是诚实且有说服力的。
-2. **Spark 打分阶段并行效率低**：每个 task 都要从广播变量重建 12.9 M 非零的矩阵，任务数一多固定开销线性增长。
-3. **`%TEMP%` 问题**：本机进程令牌写不了系统临时目录，`movie_rec/spark.py` 的 `ensure_writable_temp()` 把 `TEMP` 指到 `data/_tmp`。队友机器正常的话可以不管。
-4. **`results/neighbors_itemcf_k100.npz`（36 MB）** 是 LSH overlap 的基准邻居表，不提交 git，需要时 `scripts/run_itemcf.py` 重新生成。
-5. **项目根目录的 `tmp*`、`pip-*` 目录**是历史调试残留，已 gitignore，不用管。
-
----
-
-## 9. 有疑问找谁
-
-| 问题 | 找谁 |
-|---|---|
-| 候选集/标签口径、test 阶段打分 | 成员一 |
-| 分数怎么融合、排序模型怎么接 | 成员三 |
-| 指标数字、报告章节、消融表 | 成员四 |
-| 召回算法本身、Spark 作业、复现脚本 | 成员二（本仓库） |
+单步命令见 `README.md` 第 2 节。

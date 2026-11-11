@@ -1,0 +1,38 @@
+{
+  "name": "itemcf_val",
+  "stage": "val",
+  "n_pairs": 99998,
+  "n_users": 5498,
+  "clipped": false,
+  "evaluated_at": "2026-11-10 22:40:25",
+  "data": {
+    "pairs": "D:\\movie-rec\\data\\hybrid\\val_pairs.parquet",
+    "ratings": "D:\\movie-rec\\data\\hybrid\\ratings.csv"
+  },
+  "rmse": 0.996464,
+  "mae": 0.764496,
+  "weighting": "pair",
+  "rmse_pair_weighted": 0.996464,
+  "rmse_user_weighted": 0.986511,
+  "by_half": {
+    "movielens32m": {
+      "rmse": 0.935492,
+      "mae": 0.705982,
+      "n_pairs": 48078,
+      "n_users": 2776,
+      "weighting": "pair"
+    },
+    "synthetic": {
+      "rmse": 1.049771,
+      "mae": 0.81868,
+      "n_pairs": 51920,
+      "n_users": 2722,
+      "weighting": "pair"
+    }
+  },
+  "pred_min": 0.5,
+  "pred_max": 5.0,
+  "truth_mean": 3.540691,
+  "bias": 0.018879,
+  "elapsed_s": 0.05
+}

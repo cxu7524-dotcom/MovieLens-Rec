@@ -1,0 +1,180 @@
+{
+  "model": "minhash-lsh-neighbours",
+  "top_k": 100,
+  "signature": {
+    "hashes": 1024,
+    "build_s": 139.9,
+    "mb": 584.1
+  },
+  "queried_items": 17024,
+  "exact": {
+    "build_s": 163.6,
+    "rmse": 0.926127,
+    "edges": 14108191
+  },
+  "best_overlap_config": {
+    "bands": 64,
+    "rows": 4,
+    "overlap@100": 0.0091,
+    "gen_s": 100.01
+  },
+  "best_rmse_config": {
+    "bands": 32,
+    "rows": 4,
+    "rmse": 0.929656,
+    "overlap@100": 0.0062
+  },
+  "speedup_generation_only": 1.64,
+  "speedup_with_signature": 0.68,
+  "rmse_cost": 0.00355,
+  "sweep": [
+    {
+      "bands": 16,
+      "rows": 4,
+      "n_hashes": 64,
+      "pairs": 8595684,
+      "edges": 2987242,
+      "overlap@100": 0.0038,
+      "gen_s": 19.8,
+      "peak_mb": 6838.4,
+      "rmse": 0.929657,
+      "mae": 0.722444
+    },
+    {
+      "bands": 16,
+      "rows": 8,
+      "n_hashes": 128,
+      "pairs": 4281297,
+      "edges": 1632236,
+      "overlap@100": 0.0012,
+      "gen_s": 17.18,
+      "peak_mb": 6838.4,
+      "rmse": 0.929665,
+      "mae": 0.722442
+    },
+    {
+      "bands": 16,
+      "rows": 16,
+      "n_hashes": 256,
+      "pairs": 4007485,
+      "edges": 1505742,
+      "overlap@100": 0.0011,
+      "gen_s": 17.81,
+      "peak_mb": 6838.4,
+      "rmse": 0.929665,
+      "mae": 0.722442
+    },
+    {
+      "bands": 32,
+      "rows": 4,
+      "n_hashes": 128,
+      "pairs": 16566515,
+      "edges": 3785284,
+      "overlap@100": 0.0062,
+      "gen_s": 54.71,
+      "peak_mb": 9027.2,
+      "rmse": 0.929656,
+      "mae": 0.722445
+    },
+    {
+      "bands": 32,
+      "rows": 8,
+      "n_hashes": 256,
+      "pairs": 4836913,
+      "edges": 1756467,
+      "overlap@100": 0.0013,
+      "gen_s": 29.46,
+      "peak_mb": 9027.2,
+      "rmse": 0.929665,
+      "mae": 0.722442
+    },
+    {
+      "bands": 32,
+      "rows": 16,
+      "n_hashes": 512,
+      "pairs": 4008304,
+      "edges": 1507380,
+      "overlap@100": 0.0011,
+      "gen_s": 30.64,
+      "peak_mb": 9027.2,
+      "rmse": 0.929665,
+      "mae": 0.722442
+    },
+    {
+      "bands": 64,
+      "rows": 4,
+      "n_hashes": 256,
+      "pairs": 20284117,
+      "edges": 4441983,
+      "overlap@100": 0.0091,
+      "gen_s": 100.01,
+      "peak_mb": 12589.3,
+      "rmse": 0.929677,
+      "mae": 0.722439
+    },
+    {
+      "bands": 64,
+      "rows": 8,
+      "n_hashes": 512,
+      "pairs": 5424241,
+      "edges": 1946408,
+      "overlap@100": 0.0016,
+      "gen_s": 56.54,
+      "peak_mb": 12589.3,
+      "rmse": 0.929663,
+      "mae": 0.722441
+    },
+    {
+      "bands": 64,
+      "rows": 16,
+      "n_hashes": 1024,
+      "pairs": 4010297,
+      "edges": 1510924,
+      "overlap@100": 0.0011,
+      "gen_s": 68.37,
+      "peak_mb": 12589.3,
+      "rmse": 0.929665,
+      "mae": 0.722442
+    }
+  ],
+  "delivered": {
+    "name": "lsh_val",
+    "stage": "val",
+    "n_pairs": 99998,
+    "n_users": 5498,
+    "clipped": false,
+    "evaluated_at": "2026-11-11 14:20:35",
+    "data": {
+      "pairs": "D:\\movie-rec\\data\\hybrid\\val_pairs.parquet",
+      "ratings": "D:\\movie-rec\\data\\hybrid\\ratings.csv"
+    },
+    "rmse": 0.929677,
+    "mae": 0.722439,
+    "weighting": "pair",
+    "rmse_pair_weighted": 0.929677,
+    "rmse_user_weighted": 0.938134,
+    "by_half": {
+      "movielens32m": {
+        "rmse": 0.896452,
+        "mae": 0.688337,
+        "n_pairs": 48078,
+        "n_users": 2776,
+        "weighting": "pair"
+      },
+      "synthetic": {
+        "rmse": 0.959419,
+        "mae": 0.754017,
+        "n_pairs": 51920,
+        "n_users": 2722,
+        "weighting": "pair"
+      }
+    },
+    "pred_min": 0.5,
+    "pred_max": 5.0,
+    "truth_mean": 3.540691,
+    "bias": 0.009175,
+    "elapsed_s": 0.21
+  },
+  "peak_rss_mb": 12589.3,
+  "elapsed_s": 888.4
+}

@@ -1,0 +1,185 @@
+{
+  "b0_global_mean_rmse": 1.047271,
+  "best_level": "bias (lambda=20)",
+  "best_rmse": 0.929663,
+  "absolute_drop": 0.117608,
+  "relative_drop": 0.112299,
+  "improvement_target": 0.1,
+  "target_rmse_threshold": 0.942544,
+  "meets_target": true,
+  "ladder": [
+    {
+      "level": "global (B0)",
+      "rmse": 1.047271,
+      "mae": 0.828663,
+      "rmse_user_weighted": 1.067203,
+      "bias": -0.000332,
+      "params": {
+        "mu": 3.540358
+      },
+      "by_half": {
+        "movielens32m": {
+          "rmse": 1.033442,
+          "mae": 0.818055,
+          "n_pairs": 48078,
+          "n_users": 2776,
+          "weighting": "pair"
+        },
+        "synthetic": {
+          "rmse": 1.059916,
+          "mae": 0.838486,
+          "n_pairs": 51920,
+          "n_users": 2722,
+          "weighting": "pair"
+        }
+      }
+    },
+    {
+      "level": "user mean",
+      "rmse": 1.111734,
+      "mae": 0.868033,
+      "rmse_user_weighted": 1.053011,
+      "bias": -0.007955,
+      "params": {
+        "lambda": 0.0,
+        "mu": 3.540358
+      },
+      "by_half": {
+        "movielens32m": {
+          "rmse": 1.086895,
+          "mae": 0.838335,
+          "n_pairs": 48078,
+          "n_users": 2776,
+          "weighting": "pair"
+        },
+        "synthetic": {
+          "rmse": 1.13425,
+          "mae": 0.895534,
+          "n_pairs": 51920,
+          "n_users": 2722,
+          "weighting": "pair"
+        }
+      }
+    },
+    {
+      "level": "item mean",
+      "rmse": 0.94822,
+      "mae": 0.740391,
+      "rmse_user_weighted": 0.975596,
+      "bias": -0.010125,
+      "params": {
+        "lambda": 0.0,
+        "mu": 3.540358
+      },
+      "by_half": {
+        "movielens32m": {
+          "rmse": 0.93813,
+          "mae": 0.726878,
+          "n_pairs": 48078,
+          "n_users": 2776,
+          "weighting": "pair"
+        },
+        "synthetic": {
+          "rmse": 0.957469,
+          "mae": 0.752904,
+          "n_pairs": 51920,
+          "n_users": 2722,
+          "weighting": "pair"
+        }
+      }
+    },
+    {
+      "level": "bias (lambda=20)",
+      "rmse": 0.929663,
+      "mae": 0.722442,
+      "rmse_user_weighted": 0.938493,
+      "bias": 0.009114,
+      "params": {
+        "lambda": 20.0,
+        "n_iter": 15,
+        "mu": 3.540358
+      },
+      "by_half": {
+        "movielens32m": {
+          "rmse": 0.896593,
+          "mae": 0.688452,
+          "n_pairs": 48078,
+          "n_users": 2776,
+          "weighting": "pair"
+        },
+        "synthetic": {
+          "rmse": 0.959269,
+          "mae": 0.753916,
+          "n_pairs": 51920,
+          "n_users": 2722,
+          "weighting": "pair"
+        }
+      }
+    },
+    {
+      "level": "bias + drift",
+      "rmse": 0.931461,
+      "mae": 0.723627,
+      "rmse_user_weighted": 0.939678,
+      "bias": 0.001405,
+      "params": {
+        "lambda": 20.0,
+        "n_iter": 15,
+        "mu": 3.540358,
+        "lambda_drift": 10.0
+      },
+      "by_half": {
+        "movielens32m": {
+          "rmse": 0.899629,
+          "mae": 0.689971,
+          "n_pairs": 48078,
+          "n_users": 2776,
+          "weighting": "pair"
+        },
+        "synthetic": {
+          "rmse": 0.959997,
+          "mae": 0.754792,
+          "n_pairs": 51920,
+          "n_users": 2722,
+          "weighting": "pair"
+        }
+      }
+    }
+  ],
+  "lambda_sweep": [
+    {
+      "lambda": 1.0,
+      "rmse": 0.972066,
+      "mae": 0.756128,
+      "fit_s": 12.5
+    },
+    {
+      "lambda": 5.0,
+      "rmse": 0.939643,
+      "mae": 0.731281,
+      "fit_s": 12.5
+    },
+    {
+      "lambda": 10.0,
+      "rmse": 0.931596,
+      "mae": 0.724429,
+      "fit_s": 12.4
+    },
+    {
+      "lambda": 20.0,
+      "rmse": 0.929663,
+      "mae": 0.722442,
+      "fit_s": 12.3
+    },
+    {
+      "lambda": 50.0,
+      "rmse": 0.932217,
+      "mae": 0.724326,
+      "fit_s": 12.3
+    }
+  ],
+  "n_iter": 15,
+  "peak_rss_mb": 2860.0,
+  "elapsed_s": 103.3,
+  "note": "the 10% target is our reading of '>= 10% relative improvement' in RMSE terms; the teacher has not confirmed it (see README)"
+}

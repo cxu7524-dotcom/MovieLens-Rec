@@ -1,0 +1,81 @@
+{
+  "model": "spark-als",
+  "status": "INCOMPLETE - the full-data run was cancelled by the user after 8 of 12 tuning configs",
+  "what_is_missing": [
+    "remaining 4 tuning configs (rank=100)",
+    "full-data fit (31,800,204 ratings)",
+    "val RMSE for the chosen config",
+    "results/pred_val_als.csv",
+    "ALS scaling series (1/2/4/8)"
+  ],
+  "how_to_finish": "python scripts/run_als.py   then   python scripts/run_als.py --scaling",
+  "tuning_fraction": 0.1,
+  "tuning_ratings": 3180386,
+  "cold_start_fallback": "results/pred_val_baseline_best.csv (step-4 bias prediction)",
+  "partial_grid": [
+    {
+      "rank": 20,
+      "iterations": 10,
+      "reg_param": 0.01,
+      "rmse": 1.587508,
+      "note": "RMSE on a 10% sample with bias fallback for cold-start pairs"
+    },
+    {
+      "rank": 20,
+      "iterations": 10,
+      "reg_param": 0.1,
+      "rmse": 1.176377,
+      "note": "RMSE on a 10% sample with bias fallback for cold-start pairs"
+    },
+    {
+      "rank": 20,
+      "iterations": 20,
+      "reg_param": 0.01,
+      "rmse": 1.624415,
+      "note": "RMSE on a 10% sample with bias fallback for cold-start pairs"
+    },
+    {
+      "rank": 20,
+      "iterations": 20,
+      "reg_param": 0.1,
+      "rmse": 1.135242,
+      "note": "RMSE on a 10% sample with bias fallback for cold-start pairs"
+    },
+    {
+      "rank": 50,
+      "iterations": 10,
+      "reg_param": 0.01,
+      "rmse": 1.784025,
+      "note": "RMSE on a 10% sample with bias fallback for cold-start pairs"
+    },
+    {
+      "rank": 50,
+      "iterations": 10,
+      "reg_param": 0.1,
+      "rmse": 1.18926,
+      "note": "RMSE on a 10% sample with bias fallback for cold-start pairs"
+    },
+    {
+      "rank": 50,
+      "iterations": 20,
+      "reg_param": 0.01,
+      "rmse": 1.579932,
+      "note": "RMSE on a 10% sample with bias fallback for cold-start pairs"
+    },
+    {
+      "rank": 50,
+      "iterations": 20,
+      "reg_param": 0.1,
+      "rmse": 1.149963,
+      "note": "RMSE on a 10% sample with bias fallback for cold-start pairs"
+    }
+  ],
+  "partial_best": {
+    "rank": 20,
+    "iterations": 20,
+    "reg_param": 0.1,
+    "rmse": 1.135242,
+    "note": "RMSE on a 10% sample with bias fallback for cold-start pairs"
+  },
+  "note": "Tuning RMSE is inflated by partial coverage of a 10% sample; it ranks configs, it is not the model RMSE."
+}

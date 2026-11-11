@@ -1,22 +1,18 @@
-"""Offline evaluator for member two's score files.
+"""Offline evaluators for member two.
 
-The contract is deliberately narrow: a score file is ``userId,movieId,score``
-and nothing else, and it is scored against *the candidate set of one stage*.
-For ``val`` the labels come from ``validation.csv`` (rating >= 4); for ``test``
-no labels exist locally, so the evaluator only checks shape and coverage.
+Two protocols live here.
 
-Everything is numpy on top of flat arrays. At 20.3 M candidate pairs a
-per-user Python loop would take minutes; the ranking step instead sorts once
-with ``np.lexsort`` and then reads the top-k columns out of the per-user
-blocks, which is O(n log n) with a k-step vectorised pass.
+**RMSE rating prediction (2026-11, primary).** A prediction file is
+``userId,movieId,pred_rating`` and must cover every pair of the stage exactly
+once. ``val`` is scored against ``val_pairs.parquet`` (labels we own); ``test``
+has no local labels, so only shape and coverage are checked. Metrics: RMSE,
+MAE, pair count, user count — micro-averaged over pairs by default, with a
+macro (per-user) switch.
 
-Metric definitions (fixed for the whole project, see README):
-
-NDCG@k   per user, gain = 1 for a validation positive, discount = 1/log2(p+1),
-         ideal DCG from that user's positive count inside the candidate set.
-Recall@k hits@k / (number of positives for that user inside the candidate set).
-Coverage distinct movies appearing in anyone's top-k / distinct movies in the
-         candidate set. It measures catalogue breadth, not accuracy.
+**NDCG ranking (retired, kept for the Top-N demo).** Everything below the
+``legacy`` marker is the previous evaluator: candidate-set ranking with
+NDCG@k / Recall@k / coverage. The official task is no longer ranking, but the
+demo still runs on it, so the code stays.
 """
 
 from __future__ import annotations
@@ -32,12 +28,239 @@ import pandas as pd
 from movie_rec.config import Settings
 from movie_rec.dataset import (
     load_candidates,
+    load_hybrid_json,
     load_validation_positives,
     pair_key,
 )
 
 SCORE_COLUMNS = ["userId", "movieId", "score"]
 SCORE_DTYPES = {"userId": "int32", "movieId": "int32", "score": "float32"}
+
+PREDICTION_COLUMNS = ["userId", "movieId", "pred_rating"]
+PREDICTION_DTYPES = {"userId": "int32", "movieId": "int32", "pred_rating": "float64"}
+
+
+# --------------------------------------------------------------------------- #
+# RMSE rating prediction (2026-11 protocol)
+# --------------------------------------------------------------------------- #
+@dataclass
+class RatingEvalResult:
+    report: dict
+    residuals: np.ndarray
+
+
+def load_stage_pairs(settings: Settings, stage: str) -> pd.DataFrame:
+    """The pairs to predict for a stage: ``val`` carries labels, ``test`` does not."""
+    if stage == "val":
+        frame = pd.read_parquet(settings.hybrid.val_pairs)
+    elif stage == "test":
+        frame = pd.read_csv(settings.hybrid.test_pairs, dtype={"userId": "int32",
+                                                              "movieId": "int32"})
+    else:
+        raise ValueError(f"stage must be 'val' or 'test', got {stage!r}")
+    return frame.reset_index(drop=True)
+
+
+def read_predictions(path: str | Path) -> pd.DataFrame:
+    """Read ``userId,movieId,pred_rating``; reject anything that is not finite."""
+    path = Path(path)
+    if not path.is_file():
+        raise FileNotFoundError(f"prediction file not found: {path}")
+    if path.suffix.lower() == ".parquet":
+        frame = pd.read_parquet(path)
+    else:
+        header = pd.read_csv(path, nrows=0).columns.tolist()
+        if header != PREDICTION_COLUMNS:
+            raise ValueError(f"{path.name}: expected columns {PREDICTION_COLUMNS}, got {header}")
+        frame = pd.read_csv(path, dtype=PREDICTION_DTYPES)
+    missing = [c for c in PREDICTION_COLUMNS if c not in frame.columns]
+    if missing:
+        raise ValueError(f"{path.name}: missing columns {missing}")
+    return frame[PREDICTION_COLUMNS]
+
+
+def validate_predictions(
+    pred: pd.DataFrame,
+    expected: pd.DataFrame,
+    rating_min: float,
+    rating_max: float,
+    name: str = "predictions",
+) -> None:
+    """Fail loudly on duplicates, missing pairs, extra pairs, NaN or out-of-range.
+
+    The delivery contract is "one row per pair, nothing more": a silent extra
+    pair would let a model be scored on data it was not asked about, and a
+    missing pair would quietly shrink the denominator.
+    """
+    if pred.isna().any().any():
+        raise ValueError(f"{name}: contains null values")
+    values = pred["pred_rating"].to_numpy(dtype=np.float64)
+    if not np.isfinite(values).all():
+        raise ValueError(f"{name}: non-finite predictions")
+    if values.size and (values.min() < rating_min or values.max() > rating_max):
+        raise ValueError(
+            f"{name}: predictions outside [{rating_min}, {rating_max}] "
+            f"(min {values.min():.4f}, max {values.max():.4f}); clip them before writing"
+        )
+
+    if len(pred) != len(expected):
+        raise ValueError(f"{name}: {len(pred):,} rows, expected {len(expected):,}")
+    pred_keys = pair_key(pred["userId"], pred["movieId"])
+    if np.unique(pred_keys).size != pred_keys.size:
+        dupes = pred_keys.size - np.unique(pred_keys).size
+        raise ValueError(f"{name}: {dupes} duplicate (userId, movieId) rows")
+    expected_keys = np.sort(pair_key(expected["userId"], expected["movieId"]))
+    got = np.sort(pred_keys)
+    if not np.array_equal(got, expected_keys):
+        missing = int(expected_keys.size - np.intersect1d(got, expected_keys).size)
+        extra = int(got.size - np.intersect1d(got, expected_keys).size)
+        raise ValueError(f"{name}: pair set mismatch (missing {missing}, extra {extra})")
+
+
+def rating_metrics(
+    truth: np.ndarray,
+    pred: np.ndarray,
+    users: np.ndarray | None = None,
+    weighting: str = "pair",
+) -> dict:
+    """RMSE / MAE, micro over pairs (default) or macro over users.
+
+    ``weighting="user"`` averages each user's MSE and takes the square root of
+    that average — the exact macro analogue of the micro definition, so the
+    number stays on the rating scale and can be compared with B0.
+    """
+    truth = np.asarray(truth, dtype=np.float64)
+    pred = np.asarray(pred, dtype=np.float64)
+    if truth.shape != pred.shape:
+        raise ValueError("truth and pred must have the same length")
+    if truth.size == 0:
+        raise ValueError("no pairs to evaluate")
+    error = pred - truth
+    squared = error * error
+    absolute = np.abs(error)
+
+    if weighting == "pair":
+        rmse = float(np.sqrt(squared.mean()))
+        mae = float(absolute.mean())
+        n_users = int(np.unique(users).size) if users is not None else None
+    elif weighting == "user":
+        if users is None:
+            raise ValueError("weighting='user' needs the user id of every pair")
+        _, index = np.unique(np.asarray(users), return_inverse=True)
+        counts = np.bincount(index)
+        per_user_mse = np.bincount(index, weights=squared) / counts
+        per_user_mae = np.bincount(index, weights=absolute) / counts
+        rmse = float(np.sqrt(per_user_mse.mean()))
+        mae = float(per_user_mae.mean())
+        n_users = int(counts.size)
+    else:
+        raise ValueError(f"weighting must be 'pair' or 'user', got {weighting!r}")
+
+    return {
+        "rmse": rmse,
+        "mae": mae,
+        "n_pairs": int(truth.size),
+        "n_users": n_users,
+        "weighting": weighting,
+    }
+
+
+def evaluate_ratings(
+    name: str,
+    stage: str,
+    predictions: pd.DataFrame,
+    settings: Settings,
+    weighting: str | None = None,
+    clip: bool = False,
+) -> RatingEvalResult:
+    """Score a prediction frame against one stage and build the report."""
+    started = time.perf_counter()
+    protocol = settings.protocol
+    weighting = weighting or protocol.eval_weighting
+    expected = load_stage_pairs(settings, stage)
+
+    pred = predictions.copy()
+    if clip:
+        pred["pred_rating"] = pred["pred_rating"].clip(protocol.rating_min, protocol.rating_max)
+    validate_predictions(pred, expected, protocol.rating_min, protocol.rating_max, name)
+
+    # Align by key, not by row position: a prediction file may arrive in any
+    # order (the val split is ordered by timestamp, not by movie). Both frames
+    # are sorted on the same key, which is a valid alignment because
+    # validate_predictions already proved the key sets are identical.
+    expected_keys = pair_key(expected["userId"], expected["movieId"])
+    exp_order = np.argsort(expected_keys, kind="stable")
+    pred_keys = pair_key(pred["userId"], pred["movieId"])
+    pred_order = np.argsort(pred_keys, kind="stable")
+    values = pred["pred_rating"].to_numpy(dtype=np.float64)[pred_order]
+
+    report: dict = {
+        "name": name,
+        "stage": stage,
+        "n_pairs": int(len(expected)),
+        "n_users": int(expected["userId"].nunique()),
+        "clipped": bool(clip),
+        "evaluated_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "data": {
+            "pairs": str(settings.hybrid.val_pairs if stage == "val" else settings.hybrid.test_pairs),
+            "ratings": str(settings.hybrid.ratings),
+        },
+    }
+
+    if stage != "val":
+        report.update({"rmse": None, "mae": None, "weighting": weighting,
+                       "note": "test stage has no local labels; shape and coverage only"})
+        report["elapsed_s"] = round(time.perf_counter() - started, 2)
+        return RatingEvalResult(report, np.empty(0))
+
+    truth = expected["rating"].to_numpy(dtype=np.float64)[exp_order]
+    users = expected["userId"].to_numpy()[exp_order]
+    metrics = rating_metrics(truth, values, users, weighting)
+    residuals = values - truth
+
+    # Same numbers per data half: a model that fits the synthetic half far
+    # better than the MovieLens half is overfitting one distribution.
+    id_ranges = load_hybrid_json(settings, "id_ranges")
+    movie_half = np.where(
+        expected["movieId"].to_numpy()[exp_order] <= id_ranges["movielens32m_movies"][1],
+        "movielens32m", "synthetic")
+    by_half = {}
+    for half in ("movielens32m", "synthetic"):
+        mask = movie_half == half
+        if mask.any():
+            half_metrics = rating_metrics(truth[mask], values[mask], users[mask], weighting)
+            by_half[half] = {k: round(v, 6) if isinstance(v, float) else v
+                             for k, v in half_metrics.items()}
+
+    report.update(
+        {
+            "rmse": round(metrics["rmse"], 6),
+            "mae": round(metrics["mae"], 6),
+            "weighting": weighting,
+            "rmse_pair_weighted": round(rating_metrics(truth, values, users, "pair")["rmse"], 6),
+            "rmse_user_weighted": round(rating_metrics(truth, values, users, "user")["rmse"], 6),
+            "by_half": by_half,
+            "pred_min": round(float(values.min()), 4),
+            "pred_max": round(float(values.max()), 4),
+            "truth_mean": round(float(truth.mean()), 6),
+            "bias": round(float(residuals.mean()), 6),
+            "elapsed_s": round(time.perf_counter() - started, 2),
+        }
+    )
+    return RatingEvalResult(report, residuals)
+
+
+def write_rating_report(result: RatingEvalResult, path: str | Path) -> Path:
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(result.report, indent=2, ensure_ascii=False), encoding="utf-8")
+    return path
+
+
+# --------------------------------------------------------------------------- #
+# legacy: NDCG ranking evaluator (Top-N demo, not the official task)
+# --------------------------------------------------------------------------- #
+
 
 
 # --------------------------------------------------------------------------- #

@@ -127,6 +127,72 @@ def pair_key(user, movie) -> np.ndarray:
     return (u << 32) | m
 
 
+# --------------------------------------------------------------------------- #
+# 2026-11 hybrid delivery (RMSE rating prediction)
+# --------------------------------------------------------------------------- #
+HYBRID_RATING_DTYPES = {
+    "userId": "int32",
+    "movieId": "int32",
+    "rating": "float64",
+    "timestamp": "int64",
+}
+HYBRID_PAIR_DTYPES = {"userId": "int32", "movieId": "int32", "timestamp": "int64"}
+
+
+def load_hybrid_ratings(
+    settings: Settings, columns: list[str] | None = None
+) -> pd.DataFrame:
+    """The 31.9 M training ratings (already hidden-set free)."""
+    dtypes = {k: v for k, v in HYBRID_RATING_DTYPES.items()
+              if columns is None or k in columns}
+    return _cached_parquet(settings, settings.hybrid.ratings, columns, dtypes)
+
+
+def load_hybrid_test_pairs(settings: Settings) -> pd.DataFrame:
+    """100,000 (userId, movieId, timestamp) rows with no rating column."""
+    return _cached_parquet(settings, settings.hybrid.test_pairs, None, HYBRID_PAIR_DTYPES)
+
+
+def load_hybrid_movies(settings: Settings) -> pd.DataFrame:
+    return _cached_parquet(
+        settings, settings.hybrid.movies, None,
+        {"movieId": "int32", "title": "string", "genres": "string"},
+    )
+
+
+def load_hybrid_tags(settings: Settings) -> pd.DataFrame:
+    return _cached_parquet(
+        settings, settings.hybrid.tags, None,
+        {"userId": "int32", "movieId": "int32", "tag": "string", "timestamp": "int64"},
+    )
+
+
+def load_hybrid_json(settings: Settings, name: str) -> dict:
+    """Read ``summary.json`` or ``id_ranges.json`` from the delivery."""
+    import json
+
+    path = {"summary": settings.hybrid.summary, "id_ranges": settings.hybrid.id_ranges}[name]
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def hybrid_id_masks(users: np.ndarray, movies: np.ndarray, id_ranges: dict) -> dict:
+    """Split row-level ids into the MovieLens half and the synthetic half."""
+    ml_u = id_ranges["movielens32m_users"]
+    syn_u = id_ranges["synthetic_users"]
+    ml_m = id_ranges["movielens32m_movies"]
+    syn_m = id_ranges["synthetic_movies"]
+    user_half = np.where(users <= ml_u[1], "movielens32m", "synthetic")
+    movie_half = np.where(movies <= ml_m[1], "movielens32m", "synthetic")
+    return {
+        "user_half": user_half,
+        "movie_half": movie_half,
+        "ml_user_range": (int(ml_u[0]), int(ml_u[1])),
+        "syn_user_range": (int(syn_u[0]), int(syn_u[1])),
+        "ml_movie_range": (int(ml_m[0]), int(ml_m[1])),
+        "syn_movie_range": (int(syn_m[0]), int(syn_m[1])),
+    }
+
+
 def write_score_csv(
     path: Path,
     users: np.ndarray,

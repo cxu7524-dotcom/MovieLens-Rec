@@ -1,0 +1,59 @@
+{
+  "model": "itemcf",
+  "model_note": "itemcf",
+  "test_pairs": 100000,
+  "pred_test_columns": [
+    "userId",
+    "movieId",
+    "pred_rating"
+  ],
+  "pred_range": [
+    0.5349,
+    5.0
+  ],
+  "b0_global_mean_rmse": 1.047271,
+  "val_rmse": 0.926035,
+  "val_by_half": {
+    "movielens32m": {
+      "rmse": 0.885868,
+      "mae": 0.678391,
+      "n_pairs": 48078,
+      "n_users": 2776,
+      "weighting": "pair"
+    },
+    "synthetic": {
+      "rmse": 0.961735,
+      "mae": 0.755941,
+      "n_pairs": 51920,
+      "n_users": 2722,
+      "weighting": "pair"
+    }
+  },
+  "improvement_target": 0.1,
+  "target_rmse_threshold": 0.942544,
+  "meets_target": true,
+  "absolute_drop": 0.121236,
+  "relative_drop": 0.115764,
+  "target_note": "10% relative improvement is our interpretation; NOT confirmed by the teacher",
+  "weighting_note": "pair-equal micro RMSE is the default; per-user macro is reported alongside it and is a low-risk open question",
+  "test_by_half_predictions": {
+    "movielens32m": {
+      "n_pairs": 49953,
+      "pred_mean": 3.671433,
+      "pred_std": 0.487149,
+      "pred_min": 0.5349,
+      "pred_max": 5.0,
+      "note": "no labels locally; RMSE by half is reported on val instead"
+    },
+    "synthetic": {
+      "n_pairs": 50047,
+      "pred_mean": 3.552916,
+      "pred_std": 0.451183,
+      "pred_min": 1.1523,
+      "pred_max": 4.9482,
+      "note": "no labels locally; RMSE by half is reported on val instead"
+    }
+  },
+  "peak_rss_mb": 5292.0,
+  "elapsed_s": 439.1
+}

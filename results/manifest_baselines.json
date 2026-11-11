@@ -1,0 +1,81 @@
+{
+  "run": "baselines",
+  "created_at": "2026-11-11 13:58:08",
+  "params": {
+    "lambdas": [
+      1.0,
+      5.0,
+      10.0,
+      20.0,
+      50.0
+    ],
+    "n_iter": 15
+  },
+  "protocol": {
+    "positive_threshold": 4.0,
+    "negatives_per_user": 100,
+    "val_seed": 20260908,
+    "test_seed": 20260907,
+    "ndcg_k": 10
+  },
+  "env": {
+    "python": "3.11.5",
+    "platform": "Windows-10-10.0.26100-SP0",
+    "cpu_count": 16,
+    "total_ram_gb": 17.0,
+    "packages": {
+      "pandas": "3.1.0",
+      "numpy": "2.4.6",
+      "scipy": "1.17.1",
+      "pyarrow": "26.0.0",
+      "pyspark": "3.5.3"
+    },
+    "java_home": "D:\\jdk21",
+    "pid": 5996
+  },
+  "data": {
+    "train": {
+      "path": "data\\official\\data\\processed\\train.csv",
+      "bytes": 698179480,
+      "mtime": "2026-11-05 12:52:27",
+      "sha1_head": "a5bf21e1e51c2eab"
+    },
+    "validation": {
+      "path": "data\\official\\data\\processed\\validation.csv",
+      "bytes": 87898431,
+      "mtime": "2026-11-05 12:52:27",
+      "sha1_head": "268df2bd961c4389"
+    },
+    "movies": {
+      "path": "data\\official\\data\\raw\\ml-32m\\movies.csv",
+      "bytes": 4242926,
+      "mtime": "2026-11-05 12:52:27",
+      "sha1_head": "2c39c8bf67f83118"
+    },
+    "candidates_val": {
+      "path": "data\\official\\data\\candidates\\validation_candidates.csv",
+      "bytes": 284370393,
+      "mtime": "2026-11-05 12:52:24",
+      "sha1_head": "fd574873acd9d383"
+    },
+    "candidates_test": {
+      "path": "data\\official\\data\\candidates\\test_candidates.csv",
+      "bytes": 289720587,
+      "mtime": "2026-11-05 12:52:23",
+      "sha1_head": "2b682c0991b115a4"
+    },
+    "cutoffs_val": {
+      "path": "data\\official\\data\\candidates\\validation_cutoffs.csv",
+      "bytes": 3415084,
+      "mtime": "2026-11-05 12:52:24",
+      "sha1_head": "e1802914690442aa"
+    },
+    "cutoffs_test": {
+      "path": "data\\official\\data\\candidates\\test_cutoffs.csv",
+      "bytes": 3468420,
+      "mtime": "2026-11-05 12:52:23",
+      "sha1_head": "20593c0023cc42de"
+    }
+  },
+  "elapsed_s": 103.3
+}

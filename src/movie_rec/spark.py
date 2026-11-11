@@ -192,7 +192,11 @@ def build_spark(settings: Settings, app_name: str) -> SparkSession:
     os.environ.setdefault("PYSPARK_DRIVER_PYTHON", sys.executable)
     os.environ.setdefault(
         "PYSPARK_SUBMIT_ARGS",
-        f"--driver-memory {settings.spark.driver_memory} pyspark-shell",
+        f"--driver-memory {settings.spark.driver_memory} "
+        # ALS with many iterations serialises a deep RDD lineage; the default
+        # 1 MB thread stack is not enough to deserialize it.
+        "--conf spark.driver.extraJavaOptions=-Xss8m "
+        "pyspark-shell",
     )
 
     local_dir = settings.spark.local_dir

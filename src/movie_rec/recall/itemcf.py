@@ -225,3 +225,179 @@ def _user_positions(user_ids: np.ndarray, users: np.ndarray) -> tuple[np.ndarray
     pos = np.searchsorted(user_ids, users)
     np.clip(pos, 0, user_ids.size - 1, out=pos)
     return pos, user_ids[pos] == users
+
+
+# --------------------------------------------------------------------------- #
+# Rating prediction (2026-11 protocol)
+# --------------------------------------------------------------------------- #
+# Everything above is the retired Top-N demo (score = Σ sim). The official task
+# is now "predict the rating of a (user, movie) pair", which uses the classic
+# residual-weighted formula:
+#
+#   r̂(u,i) = b_ui + Σ_{j ∈ N_K(i) ∩ I_u} sim(i,j)·(r_uj − b_uj) / Σ |sim(i,j)|
+#
+# where b_ui = μ + b_u + b_i comes from the bias model of step 4 and N_K(i) are
+# i's K most similar items. Cosine on binary vectors is non-negative, so
+# Σ|sim| == Σ sim and the denominator is a plain weighted count.
+# --------------------------------------------------------------------------- #
+@dataclass
+class ItemCFRating:
+    """Residual-weighted item-item model on top of a fitted bias baseline."""
+
+    bias: object
+    similarity: sp.csr_matrix
+    residuals: sp.csr_matrix
+    binary: sp.csr_matrix
+    user_ids: np.ndarray
+    item_ids: np.ndarray
+    k: int
+    pattern: sp.csr_matrix | None = None
+    beta: float = 0.0
+    build_s: float = 0.0
+    peak_mb: float = 0.0
+
+    def predict(self, users, movies, timestamps=None, clip: bool = True) -> np.ndarray:
+        users = np.asarray(users)
+        movies = np.asarray(movies)
+        base = self.bias.predict(users, movies, timestamps, clip=False)
+        out = base.copy()
+
+        pos = np.searchsorted(self.item_ids, movies)
+        np.clip(pos, 0, self.item_ids.size - 1, out=pos)
+        known_item = self.item_ids[pos] == movies
+
+        upos = np.searchsorted(self.user_ids, users)
+        np.clip(upos, 0, self.user_ids.size - 1, out=upos)
+        known_user = self.user_ids[upos] == users
+
+        # Rows are grouped by user; the official files are sorted by userId so
+        # the boundaries are contiguous, but sorting keeps this order-agnostic.
+        order = np.argsort(users, kind="stable")
+        u_sorted = users[order]
+        bounds = np.flatnonzero(np.r_[True, u_sorted[1:] != u_sorted[:-1]]) if users.size else []
+        ends = np.r_[bounds[1:], u_sorted.size] if users.size else []
+
+        for start, stop in zip(bounds, ends):
+            rows = order[start:stop]
+            rows = rows[known_item[rows]]
+            if rows.size == 0:
+                continue
+            user_row = upos[order[start]]
+            if not known_user[order[start]]:
+                continue
+            cols = pos[rows]
+            sub = self.similarity[cols]  # (len(rows) x n_items), K per row
+            residual_row = self.residuals[user_row : user_row + 1]
+            binary_row = self.binary[user_row : user_row + 1]
+            numerator = (sub @ residual_row.T).toarray().ravel()
+            denominator = (sub @ binary_row.T).toarray().ravel()
+            adjust = np.divide(numerator, denominator,
+                               out=np.zeros_like(numerator), where=denominator > 0)
+
+            # Shrinkage on the number of overlapping neighbours. With K=200 out
+            # of 142k items only one or two of a user's items are neighbours of
+            # a given candidate, so an unshrunk correction is mostly noise:
+            # cnt/(cnt+beta) pulls it back towards the bias prediction.
+            if self.beta and self.pattern is not None:
+                pattern_sub = self.pattern[cols]
+                count = (pattern_sub @ binary_row.T).toarray().ravel()
+                adjust *= count / (count + self.beta)
+
+            out[rows] = base[rows] + adjust
+
+        if clip:
+            np.clip(out, self.bias.rating_min, self.bias.rating_max, out=out)
+        return out
+
+
+def truncate_topk(sim: SimilarityResult, k: int, n_items: int) -> sp.csr_matrix:
+    """Keep the k largest similarities per row of an already top-K result."""
+    order = np.lexsort((-sim.vals, sim.rows))
+    rows = sim.rows[order]
+    cols = sim.cols[order]
+    vals = sim.vals[order]
+    counts = np.bincount(rows, minlength=n_items)
+    starts = np.concatenate(([0], np.cumsum(counts)[:-1]))
+    rank = np.arange(rows.size) - np.repeat(starts, counts)
+    keep = rank < k
+    return sp.csr_matrix(
+        (vals[keep], (rows[keep], cols[keep])), shape=(n_items, n_items), dtype=np.float32
+    )
+
+
+def fit_itemcf_rating(
+    train: pd.DataFrame,
+    bias,
+    k: int = 100,
+    block_items: int = 1000,
+    verbose: bool = False,
+) -> ItemCFRating:
+    """Fit the residual-weighted model.
+
+    ``block_items`` is 1000 rather than 2000 because the item count tripled
+    with the new dataset: a 2000 x 142,609 float32 slab is 1.1 GB, and the
+    blocked product needs the slab plus its sparse intermediate alive at once.
+    """
+    from movie_rec.runlog import peak_rss_mb
+
+    started = time.perf_counter()
+    interactions = build_matrix(train)
+    sim_result = item_item_topk(interactions, k=k, block_items=block_items,
+                                verbose=verbose)
+    similarity = sim_result.to_csr(interactions.shape[1])
+
+    # Residuals at the observed entries: r - (μ + b_u + b_i), no clipping —
+    # clipping here would bias the neighbourhood correction towards zero.
+    base = bias.predict(train["userId"].to_numpy(), train["movieId"].to_numpy(),
+                        train["timestamp"].to_numpy(), clip=False)
+    residual = train["rating"].to_numpy(dtype=np.float64) - base
+    # Map every training row itself, rather than reading .tocoo().row/.col off
+    # the CSR: scipy sorts COO triplets by (row, col), so those arrays only
+    # line up with `train` while the file happens to be sorted the same way.
+    # Feeding scipy the same (row, col) pairs keeps residual[k] attached to
+    # train[k] regardless of input order.
+    users = np.searchsorted(interactions.user_ids, train["userId"].to_numpy())
+    items = np.searchsorted(interactions.item_ids, train["movieId"].to_numpy())
+    residuals = sp.csr_matrix(
+        (residual.astype(np.float32), (users, items)), shape=interactions.matrix.shape
+    )
+    if residuals.nnz != interactions.matrix.nnz:
+        raise ValueError("residual matrix lost entries: duplicate (userId, movieId) in train")
+
+    pattern = similarity.copy()
+    pattern.data[:] = 1.0
+
+    return ItemCFRating(
+        bias=bias,
+        similarity=similarity,
+        residuals=residuals,
+        binary=interactions.matrix,
+        user_ids=interactions.user_ids,
+        item_ids=interactions.item_ids,
+        k=k,
+        pattern=pattern,
+        build_s=round(time.perf_counter() - started, 1),
+        peak_mb=peak_rss_mb() or 0.0,
+    )
+
+
+def truncate_csr(similarity: sp.csr_matrix, k: int) -> sp.csr_matrix:
+    """Keep the k largest values per row of an existing CSR matrix.
+
+    Used to sweep K without rebuilding the similarity: the top-K sets are
+    nested, so the K=200 build serves 50 and 100 as well.
+    """
+    indptr = similarity.indptr
+    counts = np.diff(indptr)
+    order = np.lexsort((-similarity.data, np.repeat(np.arange(counts.size), counts)))
+    data = similarity.data[order]
+    indices = similarity.indices[order]
+    rows = np.repeat(np.arange(counts.size), counts)
+    starts = np.concatenate(([0], np.cumsum(counts)[:-1]))
+    rank = np.arange(rows.size) - np.repeat(starts, counts)
+    keep = rank < k
+    new_counts = np.minimum(counts, k)
+    new_indptr = np.concatenate(([0], np.cumsum(new_counts)))
+    return sp.csr_matrix(
+        (data[keep], indices[keep], new_indptr), shape=similarity.shape, dtype=np.float32
+    )

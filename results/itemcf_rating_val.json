@@ -1,0 +1,195 @@
+{
+  "model": "itemcf-rating",
+  "k_chosen": 200,
+  "beta_chosen": 20.0,
+  "block_items": 1000,
+  "bias_lambda": 20.0,
+  "similarity": {
+    "edges": 27931725,
+    "build_s": 177.5,
+    "peak_mb": 3879.8
+  },
+  "k_sweep": [
+    {
+      "k": 50,
+      "beta": 0.0,
+      "rmse": 0.996464,
+      "mae": 0.764496,
+      "bias": 0.018879,
+      "predict_s": 2.9,
+      "edges": 7095737
+    },
+    {
+      "k": 50,
+      "beta": 5.0,
+      "rmse": 0.928362,
+      "mae": 0.720178,
+      "bias": 0.014915,
+      "predict_s": 4.4,
+      "edges": 7095737
+    },
+    {
+      "k": 50,
+      "beta": 10.0,
+      "rmse": 0.926447,
+      "mae": 0.71901,
+      "bias": 0.013404,
+      "predict_s": 4.4,
+      "edges": 7095737
+    },
+    {
+      "k": 50,
+      "beta": 20.0,
+      "rmse": 0.926544,
+      "mae": 0.719369,
+      "bias": 0.01202,
+      "predict_s": 4.4,
+      "edges": 7095737
+    },
+    {
+      "k": 50,
+      "beta": 50.0,
+      "rmse": 0.927677,
+      "mae": 0.720555,
+      "bias": 0.010628,
+      "predict_s": 4.5,
+      "edges": 7095737
+    },
+    {
+      "k": 100,
+      "beta": 0.0,
+      "rmse": 1.012938,
+      "mae": 0.775331,
+      "bias": 0.016128,
+      "predict_s": 3.0,
+      "edges": 14108191
+    },
+    {
+      "k": 100,
+      "beta": 5.0,
+      "rmse": 0.929389,
+      "mae": 0.720644,
+      "bias": 0.015247,
+      "predict_s": 4.5,
+      "edges": 14108191
+    },
+    {
+      "k": 100,
+      "beta": 10.0,
+      "rmse": 0.926511,
+      "mae": 0.718801,
+      "bias": 0.014079,
+      "predict_s": 4.5,
+      "edges": 14108191
+    },
+    {
+      "k": 100,
+      "beta": 20.0,
+      "rmse": 0.926124,
+      "mae": 0.71884,
+      "bias": 0.012823,
+      "predict_s": 4.5,
+      "edges": 14108191
+    },
+    {
+      "k": 100,
+      "beta": 50.0,
+      "rmse": 0.927115,
+      "mae": 0.719962,
+      "bias": 0.011293,
+      "predict_s": 4.4,
+      "edges": 14108191
+    },
+    {
+      "k": 200,
+      "beta": 0.0,
+      "rmse": 1.026551,
+      "mae": 0.784805,
+      "bias": 0.00822,
+      "predict_s": 3.1,
+      "edges": 27931725
+    },
+    {
+      "k": 200,
+      "beta": 5.0,
+      "rmse": 0.931156,
+      "mae": 0.721999,
+      "bias": 0.013972,
+      "predict_s": 4.6,
+      "edges": 27931725
+    },
+    {
+      "k": 200,
+      "beta": 10.0,
+      "rmse": 0.927079,
+      "mae": 0.719167,
+      "bias": 0.013679,
+      "predict_s": 4.7,
+      "edges": 27931725
+    },
+    {
+      "k": 200,
+      "beta": 20.0,
+      "rmse": 0.926035,
+      "mae": 0.718656,
+      "bias": 0.013014,
+      "predict_s": 4.6,
+      "edges": 27931725
+    },
+    {
+      "k": 200,
+      "beta": 50.0,
+      "rmse": 0.92666,
+      "mae": 0.719503,
+      "bias": 0.011812,
+      "predict_s": 4.5,
+      "edges": 27931725
+    }
+  ],
+  "bias_only": {
+    "rmse": 0.929663,
+    "mae": 0.722442
+  },
+  "full": {
+    "name": "itemcf_k200_b20_val",
+    "stage": "val",
+    "n_pairs": 99998,
+    "n_users": 5498,
+    "clipped": false,
+    "evaluated_at": "2026-11-10 22:45:34",
+    "data": {
+      "pairs": "D:\\movie-rec\\data\\hybrid\\val_pairs.parquet",
+      "ratings": "D:\\movie-rec\\data\\hybrid\\ratings.csv"
+    },
+    "rmse": 0.926035,
+    "mae": 0.718656,
+    "weighting": "pair",
+    "rmse_pair_weighted": 0.926035,
+    "rmse_user_weighted": 0.929721,
+    "by_half": {
+      "movielens32m": {
+        "rmse": 0.885868,
+        "mae": 0.678391,
+        "n_pairs": 48078,
+        "n_users": 2776,
+        "weighting": "pair"
+      },
+      "synthetic": {
+        "rmse": 0.961735,
+        "mae": 0.755941,
+        "n_pairs": 51920,
+        "n_users": 2722,
+        "weighting": "pair"
+      }
+    },
+    "pred_min": 0.6895,
+    "pred_max": 5.0,
+    "truth_mean": 3.540691,
+    "bias": 0.013014,
+    "elapsed_s": 0.05
+  },
+  "vs_bias_abs": 0.003628,
+  "vs_bias_rel": 0.003902,
+  "peak_rss_mb": 3879.8,
+  "elapsed_s": 265.8
+}

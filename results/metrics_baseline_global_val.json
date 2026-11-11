@@ -1,0 +1,38 @@
+{
+  "name": "baseline_global_val",
+  "stage": "val",
+  "n_pairs": 99998,
+  "n_users": 5498,
+  "clipped": false,
+  "evaluated_at": "2026-11-11 13:56:30",
+  "data": {
+    "pairs": "D:\\movie-rec\\data\\hybrid\\val_pairs.parquet",
+    "ratings": "D:\\movie-rec\\data\\hybrid\\ratings.csv"
+  },
+  "rmse": 1.047271,
+  "mae": 0.828663,
+  "weighting": "pair",
+  "rmse_pair_weighted": 1.047271,
+  "rmse_user_weighted": 1.067203,
+  "by_half": {
+    "movielens32m": {
+      "rmse": 1.033442,
+      "mae": 0.818055,
+      "n_pairs": 48078,
+      "n_users": 2776,
+      "weighting": "pair"
+    },
+    "synthetic": {
+      "rmse": 1.059916,
+      "mae": 0.838486,
+      "n_pairs": 51920,
+      "n_users": 2722,
+      "weighting": "pair"
+    }
+  },
+  "pred_min": 3.5404,
+  "pred_max": 3.5404,
+  "truth_mean": 3.540691,
+  "bias": -0.000332,
+  "elapsed_s": 0.11
+}

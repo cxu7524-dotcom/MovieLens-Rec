@@ -27,6 +27,26 @@ candidates_test = "data/official/data/candidates/test_candidates.csv"
 cutoffs_val = "data/official/data/candidates/validation_cutoffs.csv"
 cutoffs_test = "data/official/data/candidates/test_cutoffs.csv"
 
+[data.hybrid]
+# 2026-11 dataset: `hybrid-half-half-latest100k-v1` (seed 20261106).
+# Copied verbatim from D:/qq/文件/训练数据集/ into data/hybrid/ so that every
+# script reads one project-relative path and the originals stay read-only.
+# Task changed with this delivery: predict a rating for 100,000 (userId,
+# movieId) pairs and score RMSE — no candidate sets, no Top-N ranking.
+root = "data/hybrid"
+ratings = "data/hybrid/ratings.csv"
+test_pairs = "data/hybrid/test_pairs.csv"
+movies = "data/hybrid/movies.csv"
+tags = "data/hybrid/tags.csv"
+links = "data/hybrid/links.csv"
+movie_mapping = "data/hybrid/movie_mapping.csv"
+id_ranges = "data/hybrid/id_ranges.json"
+summary = "data/hybrid/summary.json"
+# Produced by scripts/make_val_split.py (step 2), consumed by every model.
+val_train = "data/hybrid/val_train.parquet"
+val_pairs = "data/hybrid/val_pairs.parquet"
+val_split_report = "data/hybrid/val_split_report.json"
+
 [protocol]
 # Frozen project rules. If the teacher's script hard-codes something else,
 # change it here and record the difference in README.md instead of editing code.
@@ -39,6 +59,23 @@ negatives_per_user = 100
 test_seed = 20260907
 val_seed = 20260908
 ndcg_k = 10
+
+# --- RMSE protocol (2026-11-10, replaces the NDCG protocol above) -----------
+# The NDCG keys stay because the old Top-N pipeline is kept as a demo.
+rating_min = 0.5
+rating_max = 5.0
+# "pair" = micro-average over every test pair (default, what the teacher
+# described); "user" = macro-average over users, kept as a switch.
+eval_weighting = "pair"
+# ">= 10% relative improvement" read as RMSE <= B0 * (1 - 0.10).
+# NOT confirmed by the teacher: reported both as absolute and relative drop.
+improvement_target = 0.10
+# Local validation split (step 2). Mirrors summary.json hidden_selection_constraints.
+val_target_pairs = 100000
+val_min_history = 5
+val_min_movie_ratings = 1
+# Independent from val_seed above (which belongs to the retired NDCG protocol).
+val_split_seed = 20261106
 
 [spark]
 master = "local[*]"
